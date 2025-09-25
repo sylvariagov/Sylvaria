@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login - Connect</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://kit.fontawesome.com/179ab4bc4c.js" crossorigin="anonymous"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #111827;
+            color: #f3f4f6;
+        }
+        .card {
+            background-color: #1f2937;
+            border-radius: 1.5rem;
+            padding: 2.5rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center">
+
+    <div class="max-w-md w-full">
+        <header class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-white tracking-tight">Welcome to <span class="text-sky-400">Connect</span></h1>
+            <p class="text-gray-400 mt-2">Your community awaits.</p>
+        </header>
+
+        <div class="card">
+            <!-- Email/Password Forms -->
+            <div id="auth-forms">
+                <!-- Sign In Form -->
+                <form id="login-form">
+                    <h2 class="text-2xl font-semibold text-center mb-6">Sign In</h2>
+                    <div class="space-y-4">
+                        <input type="email" id="login-email" placeholder="Email" class="w-full bg-gray-800 rounded-lg p-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-sky-500" required>
+                        <input type="password" id="login-password" placeholder="Password" class="w-full bg-gray-800 rounded-lg p-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-sky-500" required>
+                    </div>
+                    <button type="submit" class="w-full bg-sky-500 hover:bg-sky-600 text-white font-bold py-3 px-4 rounded-lg mt-6">Sign In</button>
+                </form>
+
+                <!-- Sign Up Form (hidden by default) -->
+                <form id="signup-form" class="hidden">
+                    <h2 class="text-2xl font-semibold text-center mb-6">Create Account</h2>
+                    <div class="space-y-4">
+                        <input type="email" id="signup-email" placeholder="Email" class="w-full bg-gray-800 rounded-lg p-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-sky-500" required>
+                        <input type="password" id="signup-password" placeholder="Password" class="w-full bg-gray-800 rounded-lg p-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-sky-500" required>
+                    </div>
+                    <button type="submit" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 px-4 rounded-lg mt-6">Sign Up</button>
+                </form>
+
+                <p id="toggle-form" class="text-center text-gray-400 mt-6 cursor-pointer hover:text-white">Don't have an account? Sign Up</p>
+            </div>
+
+            <!-- Social Sign-in -->
+            <div class="mt-6">
+                <div class="relative">
+                    <div class="absolute inset-0 flex items-center">
+                        <div class="w-full border-t border-gray-600"></div>
+                    </div>
+                    <div class="relative flex justify-center text-sm">
+                        <span class="px-2 bg-gray-800 text-gray-400 rounded-full">Or continue with</span>
+                    </div>
+                </div>
+
+                <div class="mt-6 grid grid-cols-2 gap-4">
+                    <button id="google-signin" class="w-full bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 px-4 rounded-lg flex items-center justify-center"><i class="fab fa-google mr-2"></i> Google</button>
+                    <button id="microsoft-signin" class="w-full bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 px-4 rounded-lg flex items-center justify-center"><i class="fab fa-microsoft mr-2"></i> Microsoft</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase and Auth Logic -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.16.0/firebase-app.js";
+        import { 
+            getAuth,
+            createUserWithEmailAndPassword,
+            signInWithEmailAndPassword,
+            GoogleAuthProvider,
+            OAuthProvider,
+            signInWithPopup
+        } from "https://www.gstatic.com/firebasejs/9.16.0/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyB2NK-z6i74kTExGUE_ilN1jM8_oqEeSRs",
+            authDomain: "sylvaria-universe.firebaseapp.com",
+            projectId: "sylvaria-universe",
+            storageBucket: "sylvaria-universe.firebasestorage.app",
+            messagingSenderId: "256537971475",
+            appId: "1:256537971475:web:baaac36786b918338428e6",
+            measurementId: "G-4MCYL3VM15"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        const loginForm = document.getElementById('login-form');
+        const signupForm = document.getElementById('signup-form');
+        const toggleForm = document.getElementById('toggle-form');
+
+        function redirectToConnect() {
+            window.location.href = 'connect.html?t=' + new Date().getTime();
+        }
+
+        toggleForm.addEventListener('click', () => {
+            loginForm.classList.toggle('hidden');
+            signupForm.classList.toggle('hidden');
+            if (signupForm.classList.contains('hidden')) {
+                toggleForm.textContent = 'Don\'t have an account? Sign Up';
+            } else {
+                toggleForm.textContent = 'Already have an account? Sign In';
+            }
+        });
+
+        // Email/Password Sign Up
+        signupForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('signup-email').value;
+            const password = document.getElementById('signup-password').value;
+            createUserWithEmailAndPassword(auth, email, password)
+                .then(userCredential => {
+                    redirectToConnect();
+                })
+                .catch(error => alert(error.message));
+        });
+
+        // Email/Password Sign In
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            signInWithEmailAndPassword(auth, email, password)
+                .then(userCredential => {
+                    redirectToConnect();
+                })
+                .catch(error => alert(error.message));
+        });
+
+        // Google Sign In
+        const googleProvider = new GoogleAuthProvider();
+        document.getElementById('google-signin').addEventListener('click', () => {
+            signInWithPopup(auth, googleProvider)
+                .then(result => {
+                    redirectToConnect();
+                }).catch(error => alert(error.message));
+        });
+
+        // Microsoft Sign In
+        const microsoftProvider = new OAuthProvider('microsoft.com');
+        document.getElementById('microsoft-signin').addEventListener('click', () => {
+            signInWithPopup(auth, microsoftProvider)
+                .then(result => {
+                    redirectToConnect();
+                }).catch(error => alert(error.message));
+        });
+
+    </script>
+
+</body>
+</html>
