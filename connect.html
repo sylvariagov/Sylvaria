@@ -390,21 +390,12 @@
 
                 function renderAllUsers() {
                     allUsersContainer.innerHTML = '';
-
-                    if (!currentUserData) {
-                        allUsersContainer.innerHTML = '<p class="text-gray-400 text-center">Loading your profile...</p>';
-                        return;
-                    }
+                    if (!currentUserData) return;
 
                     const usersToRender = allUsersCache.filter(u => u.id !== user.uid);
 
-                    if (allUsersCache.length > 0 && usersToRender.length === 0) {
-                        allUsersContainer.innerHTML = '<p class="text-gray-400 text-center">You are the only user here!</p>';
-                        return;
-                    }
-
-                    if (allUsersCache.length === 0) {
-                        allUsersContainer.innerHTML = '<p class="text-gray-400 text-center">Finding other users...</p>';
+                    if (usersToRender.length === 0) {
+                        allUsersContainer.innerHTML = `<p class="text-gray-400">No other users found.</p>`;
                         return;
                     }
 
@@ -437,23 +428,23 @@
                 });
 
                 onSnapshot(userRef, (docSnap) => {
-                    currentUserData = docSnap.data();
-                    if (!currentUserData) return;
-
+                    const userData = docSnap.data();
+                    if (!userData) return;
+                    currentUserData = userData;
                     const profileCard = document.getElementById('profile-card');
                     profileCard.innerHTML = `<div class="w-24 h-24 rounded-full mx-auto bg-gray-700 mb-4 flex items-center justify-center overflow-hidden relative">
-                        <img src="${currentUserData.photoURL}" alt="Profile Picture" class="w-full h-full object-cover">
+                        <img src="${userData.photoURL}" alt="Profile Picture" class="w-full h-full object-cover">
                         <button id="edit-profile-btn" class="profile-edit-btn"><i class="fas fa-pen"></i></button>
                     </div>
-                    <div class="relative"><h2 class="text-xl font-semibold inline-block">${currentUserData.displayName}</h2>
+                    <div class="relative"><h2 class="text-xl font-semibold inline-block">${userData.displayName}</h2>
                     <button id="edit-displayname-btn" class="ml-2 text-sky-500 hover:text-sky-400"><i class="fas fa-pen"></i></button></div>
-                    <p class="text-gray-400">${currentUserData.email}</p>
-                    <div class="flex justify-around mt-4 border-t border-gray-700 pt-4"><div><p class="font-bold text-lg">${currentUserData.posts || 0}</p><p class="text-gray-400 text-sm">Posts</p></div><div><p class="font-bold text-lg">${(currentUserData.friends || []).length}</p><p class="text-gray-400 text-sm">Friends</p></div></div>`;
+                    <p class="text-gray-400">${userData.email}</p>
+                    <div class="flex justify-around mt-4 border-t border-gray-700 pt-4"><div><p class="font-bold text-lg">${userData.posts || 0}</p><p class="text-gray-400 text-sm">Posts</p></div><div><p class="font-bold text-lg">${(userData.friends || []).length}</p><p class="text-gray-400 text-sm">Friends</p></div></div>`;
                     const badge = document.getElementById('friend-request-badge');
-                    const requestCount = (currentUserData.friendRequestsReceived || []).length;
+                    const requestCount = (userData.friendRequestsReceived || []).length;
                     if (requestCount > 0) { badge.textContent = requestCount; badge.classList.remove('hidden'); } else { badge.classList.add('hidden'); }
-                    document.getElementById('edit-profile-btn').onclick = () => openProfileEditModal(currentUserData);
-                    document.getElementById('edit-displayname-btn').onclick = () => openProfileEditModal(currentUserData);
+                    document.getElementById('edit-profile-btn').onclick = () => openProfileEditModal(userData);
+                    document.getElementById('edit-displayname-btn').onclick = () => openProfileEditModal(userData);
 
                     if (!friendsPage.classList.contains('hidden')) {
                         renderAllUsers();
@@ -486,40 +477,75 @@
                     friendsPage.classList.add('hidden');
                     notificationsPage.classList.add('hidden');
                     Object.values(navButtons).forEach(b => b.classList.remove('active'));
-
-                    if (page === 'feed') {
-                        feedPage.classList.remove('hidden');
-                        navButtons.home.classList.add('active');
-                    } else if (page === 'friends') {
-                        friendsPage.classList.remove('hidden');
-                        navButtons.friends.classList.add('active');
-                        renderAllUsers();
-                    } else if (page === 'notifications') {
-                        notificationsPage.classList.remove('hidden');
-                        navButtons.notifications.classList.add('active');
-                        displayFriendRequests();
-                    }
+                    if (page === 'feed') { feedPage.classList.remove('hidden'); navButtons.home.classList.add('active'); }
+                    if (page === 'friends') { friendsPage.classList.remove('hidden'); navButtons.friends.classList.add('active'); renderAllUsers(); }
+                    if (page === 'notifications') { notificationsPage.classList.remove('hidden'); navButtons.notifications.classList.add('active'); displayFriendRequests(); }
                 }
-
                 navButtons.home.addEventListener('click', (e) => { e.preventDefault(); showPage('feed'); });
                 navButtons.friends.addEventListener('click', (e) => { e.preventDefault(); showPage('friends'); });
                 navButtons.notifications.addEventListener('click', (e) => { e.preventDefault(); showPage('notifications'); });
 
                 async function sendFriendRequest(recipientId) {
-                    await updateDoc(userRef, { friendRequestsSent: arrayUnion(recipientId) });
-                    await updateDoc(doc(db, "users", recipientId), { friendRequestsReceived: arrayUnion(user.uid) });
+                    try {
+                        console.log(`Attempting to send friend request from ${user.uid} to ${recipientId}`);
+                        const senderRef = doc(db, "users", user.uid);
+                        const recipientRef = doc(db, "users", recipientId);
+
+                        await updateDoc(senderRef, { friendRequestsSent: arrayUnion(recipientId) });
+                        console.log("Successfully updated sender's friendRequestsSent list.");
+
+                        await updateDoc(recipientRef, { friendRequestsReceived: arrayUnion(user.uid) });
+                        console.log("Successfully updated recipient's friendRequestsReceived list.");
+
+                        console.log("Friend request process completed successfully.");
+                    } catch (error) {
+                        console.error("Error sending friend request:", error);
+                        alert(`Failed to send friend request. Please check the console for details. Error: ${error.message}`);
+                    }
                 }
+
                 async function acceptFriendRequest(senderId) {
-                    await updateDoc(userRef, { friends: arrayUnion(senderId), friendRequestsReceived: arrayRemove(senderId) });
-                    await updateDoc(doc(db, "users", senderId), { friends: arrayUnion(user.uid), friendRequestsSent: arrayRemove(user.uid) });
+                    try {
+                        console.log(`Attempting to accept friend request from ${senderId}`);
+                        const currentUserRef = doc(db, "users", user.uid);
+                        const senderRef = doc(db, "users", senderId);
+
+                        await updateDoc(currentUserRef, { friends: arrayUnion(senderId), friendRequestsReceived: arrayRemove(senderId) });
+                        await updateDoc(senderRef, { friends: arrayUnion(user.uid), friendRequestsSent: arrayRemove(user.uid) });
+                        
+                        console.log("Friend acceptance process completed successfully.");
+                    } catch (error) {
+                        console.error("Error accepting friend request:", error);
+                        alert(`Failed to accept friend request. Please check the console for details. Error: ${error.message}`);
+                    }
+                }
+
+                async function declineFriendRequest(senderId) {
+                    try {
+                        console.log(`Attempting to decline friend request from ${senderId}`);
+                        const currentUserRef = doc(db, "users", user.uid);
+                        const senderRef = doc(db, "users", senderId);
+
+                        await updateDoc(currentUserRef, { friendRequestsReceived: arrayRemove(senderId) });
+                        await updateDoc(senderRef, { friendRequestsSent: arrayRemove(user.uid) });
+
+                        console.log("Friend decline process completed successfully.");
+                    } catch (error) {
+                        console.error("Error declining friend request:", error);
+                        alert(`Failed to decline friend request. Please check the console for details. Error: ${error.message}`);
+                    }
                 }
 
                 allUsersContainer.addEventListener('click', async (e) => {
-                    if (e.target.classList.contains('add-friend-button')) {
-                        await sendFriendRequest(e.target.dataset.uid);
+                    const button = e.target.closest('button');
+                    if (!button) return;
+
+                    const uid = button.dataset.uid;
+                    if (button.classList.contains('add-friend-button')) {
+                        await sendFriendRequest(uid);
                     }
-                    if (e.target.classList.contains('accept-friend-button')) {
-                        await acceptFriendRequest(e.target.dataset.uid);
+                    if (button.classList.contains('accept-friend-button')) {
+                        await acceptFriendRequest(uid);
                     }
                 });
 
@@ -541,16 +567,11 @@
                     }
                 }
                 friendRequestsContainer.addEventListener('click', async (e) => {
-                    const uid = e.target.dataset.uid;
-                    if (e.target.classList.contains('accept-friend-button')) { 
-                        await acceptFriendRequest(uid); 
-                        await displayFriendRequests();
-                    }
-                    if (e.target.classList.contains('decline-friend-button')) {
-                        await updateDoc(userRef, { friendRequestsReceived: arrayRemove(uid) });
-                        await updateDoc(doc(db, "users", uid), { friendRequestsSent: arrayRemove(user.uid) });
-                        await displayFriendRequests();
-                    }
+                    const button = e.target.closest('button');
+                    if (!button) return;
+                    const uid = button.dataset.uid;
+                    if (button.classList.contains('accept-friend-button')) { await acceptFriendRequest(uid); }
+                    if (button.classList.contains('decline-friend-button')) { await declineFriendRequest(uid); }
                 });
 
                 // --- POST CREATION LOGIC ---
