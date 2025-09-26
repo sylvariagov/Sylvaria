@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Connect</title>
+    <title>Sylvaria Connect</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://kit.fontawesome.com/179ab4bc4c.js" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
@@ -21,7 +21,11 @@
             padding: 1.5rem;
             box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3), 0 4px 6px -2px rgba(0,0,0,0.25);
         }
-        .nav-button.active, .like-button.liked {
+        .nav-button.active {
+            color: #38bdf8;
+            border-bottom: 3px solid #38bdf8;
+        }
+        .like-button.liked {
             color: #38bdf8;
         }
         .profile-edit-modal input, .profile-edit-modal button, .profile-edit-modal textarea {margin-bottom:1rem;}
@@ -34,18 +38,25 @@
 </head>
 <body class="bg-gray-900">
 
-<header class="bg-gray-800 shadow-lg p-4 flex justify-between items-center sticky top-0 z-40">
-    <div class="flex items-center space-x-4">
-        <a href="launchpad.html" class="text-gray-300 hover:text-white text-sm font-semibold"><i class="fas fa-rocket mr-2"></i>Launchpad</a>
-        <h1 class="text-2xl font-bold text-sky-400 ml-4">Connect</h1>
+<header class="bg-gray-800 shadow-lg p-2 flex items-center sticky top-0 z-40">
+    <!-- Left Section -->
+    <div class="w-1/4">
+        <h1 class="text-2xl font-bold text-sky-400 ml-4">Sylvaria Connect</h1>
     </div>
-    <div id="header-nav" class="hidden items-center space-x-4">
-        <a href="#" id="home-button" class="nav-button text-gray-300 hover:text-white active"><i class="fas fa-home"></i></a>
-        <a href="#" id="pages-button" class="nav-button text-gray-300 hover:text-white"><i class="fas fa-file-alt"></i></a>
-        <a href="#" id="friends-button" class="nav-button text-gray-300 hover:text-white"><i class="fas fa-user-friends"></i></a>
-        <a href="#" id="notifications-button" class="nav-button text-gray-300 hover:text-white relative"><i class="fas fa-bell"></i><span id="friend-request-badge" class="hidden absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center"></span></a>
+
+    <!-- Center Section (Nav Icons) -->
+    <div id="header-nav-center" class="w-1/2 hidden md:flex justify-center items-center space-x-8">
+        <a href="#" id="home-button" class="nav-button text-gray-300 hover:text-white active text-3xl px-6 py-2 rounded-lg"><i class="fas fa-home"></i></a>
+        <a href="#" id="pages-button" class="nav-button text-gray-300 hover:text-white text-3xl px-6 py-2 rounded-lg"><i class="fas fa-file-alt"></i></a>
+        <a href="#" id="groups-button" class="nav-button text-gray-300 hover:text-white text-3xl px-6 py-2 rounded-lg"><i class="fas fa-users"></i></a>
+        <a href="#" id="friends-button" class="nav-button text-gray-300 hover:text-white text-3xl px-6 py-2 rounded-lg"><i class="fas fa-user-friends"></i></a>
+    </div>
+
+    <!-- Right Section -->
+    <div id="header-nav-right" class="w-1/4 hidden md:flex justify-end items-center space-x-4 mr-4">
+        <a href="#" id="notifications-button" class="nav-button text-gray-300 hover:text-white relative text-2xl"><i class="fas fa-bell"></i><span id="friend-request-badge" class="hidden absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center"></span></a>
         <div id="user-menu" class="relative">
-            <button id="user-menu-button" class="text-gray-300 hover:text-white"><i class="fas fa-user-circle text-2xl"></i></button>
+            <button id="user-menu-button" class="text-gray-300 hover:text-white"><i class="fas fa-user-circle text-3xl"></i></button>
             <div id="user-menu-dropdown" class="hidden absolute right-0 mt-2 w-48 bg-gray-800 rounded-md shadow-lg py-1 ring-1 ring-black ring-opacity-5">
                 <a href="#" id="sign-out-button" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700">Sign Out</a>
             </div>
@@ -57,7 +68,7 @@
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div class="md:col-span-1">
             <div class="sticky top-20">
-                <div class="card text-center relative" id="profile-card"></div>
+                <div id="profile-card-container"></div>
                 <div class="card mt-4">
                     <h2 class="text-xl font-semibold mb-4">Friends</h2>
                     <div id="friends-list-container" class="space-y-4"></div>
@@ -67,8 +78,10 @@
         <div class="md:col-span-2">
             <!-- Feed Page -->
             <div id="feed-page-container">
+                <div id="stories-container" class="card mb-4"></div>
                 <div class="card">
                     <h2 class="text-xl font-semibold mb-4">Create a Post</h2>
+                    <div id="feeling-display" class="hidden items-center mb-2 text-gray-400"></div>
                     <textarea id="post-content" class="w-full bg-gray-800 rounded-lg p-2" placeholder="What's on your mind?"></textarea>
                     <div id="media-preview-container" class="mt-4"></div>
                     <input type="file" id="media-upload-input" class="hidden" accept="image/*,video/*">
@@ -90,6 +103,10 @@
                     <div id="feed-container"></div>
                 </div>
             </div>
+            <!-- Groups Page -->
+            <div id="groups-page-container" class="hidden"></div>
+            <!-- Hashtag Page -->
+            <div id="hashtag-page-container" class="hidden"></div>
             <!-- User's Page Container -->
             <div id="pages-page-container" class="hidden"></div>
             <!-- All Users Page -->
@@ -123,6 +140,34 @@
 </div>
 
 <!-- Modals -->
+<div id="story-viewer-modal" class="hidden fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center">
+    <button id="close-story-viewer" class="absolute top-4 right-4 text-white text-4xl font-bold">&times;</button>
+    <div id="story-content" class="relative h-full w-full max-w-lg flex items-center justify-center"></div>
+    <button id="story-prev" class="absolute left-4 text-white text-4xl"><</button>
+    <button id="story-next" class="absolute right-4 text-white text-4xl">></button>
+</div>
+<div id="create-story-modal" class="hidden fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
+    <div class="card w-full max-w-lg relative">
+        <button id="close-create-story-modal" class="absolute top-2 right-4 px-3 py-1 rounded-full bg-gray-600 text-white">&times;</button>
+        <h2 class="text-xl font-semibold mb-4">Create a Story</h2>
+        <input type="file" id="story-upload-input" class="hidden" accept="image/*,video/*">
+        <div id="story-upload-preview" class="mb-4 h-80 bg-gray-800 rounded-lg flex items-center justify-center text-gray-400"></div>
+        <div id="story-upload-error" class="text-red-400 mb-4"></div>
+        <button id="post-story-btn" class="w-full bg-sky-500 hover:bg-sky-600 text-white font-bold py-2 px-4 rounded-lg hidden">Post to Story</button>
+    </div>
+</div>
+<div id="create-group-modal" class="hidden fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
+    <div class="card w-full max-w-md relative">
+        <button id="close-create-group-modal" class="absolute top-2 right-4 px-3 py-1 rounded-full bg-gray-600 text-white">&times;</button>
+        <h2 class="text-xl font-semibold mb-4">Create a New Group</h2>
+        <form id="create-group-form" class="space-y-4">
+            <input type="text" id="group-name-input" required class="w-full bg-gray-800 rounded-lg p-2 text-white" placeholder="Group Name"/>
+            <textarea id="group-description-input" class="w-full bg-gray-800 rounded-lg p-2 text-white" placeholder="Group Description"></textarea>
+            <button type="submit" class="w-full bg-green-500 hover:bg-green-600 text-white py-2 rounded-lg font-bold">Create Group</button>
+        </form>
+        <div id="create-group-error" class="text-red-400 mt-2 text-center"></div>
+    </div>
+</div>
 <div id="profile-edit-modal" class="profile-edit-modal hidden fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
     <div class="card w-full max-w-md relative">
         <button id="close-profile-edit" class="absolute top-2 right-4 px-3 py-1 rounded-full bg-gray-600 text-white">&times;</button>
@@ -139,9 +184,14 @@
     </div>
 </div>
 <div id="feeling-modal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50">
-    <div class="card w-full max-w-md">
+    <div class="card w-full max-w-lg relative">
+        <button id="close-feeling-modal" class="absolute top-2 right-4 px-3 py-1 rounded-full bg-gray-600 text-white">&times;</button>
         <h2 class="text-xl font-semibold mb-4">How are you feeling?</h2>
-        <div id="emoji-grid" class="grid grid-cols-6 gap-4 text-3xl cursor-pointer"></div>
+        <div id="emoji-grid" class="grid grid-cols-8 gap-4 text-3xl cursor-pointer mb-4"></div>
+        <input type="text" id="activity-input" class="w-full bg-gray-800 rounded-lg p-2 text-white" placeholder="What are you doing? e.g., celebrating, watching a movie...">
+        <div class="flex justify-end mt-4">
+            <button id="save-feeling-btn" class="bg-sky-500 hover:bg-sky-600 text-white font-bold py-2 px-4 rounded-lg">Done</button>
+        </div>
     </div>
 </div>
 <div id="profile-pic-modal" class="hidden fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
@@ -160,6 +210,24 @@
             <button id="save-profile-pic-btn" class="w-full bg-green-500 hover:bg-green-600 text-white py-2 rounded-lg font-bold">Save Picture</button>
         </div>
         <div id="pic-upload-loading" class="hidden text-center"><p>Uploading...</p></div>
+    </div>
+</div>
+<div id="cover-photo-modal" class="hidden fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
+    <div class="card w-full max-w-4xl relative">
+        <button id="close-cover-modal" class="absolute top-2 right-4 px-3 py-1 rounded-full bg-gray-600 text-white">&times;</button>
+        <h2 class="text-xl font-semibold mb-4">Update Cover Photo</h2>
+        <div class="text-center mb-4">
+            <p class="text-gray-400">Upload a new image to crop.</p>
+            <input type="file" id="cover-photo-upload-input" class="hidden" accept="image/*">
+            <button id="select-cover-image-btn" class="mt-2 bg-sky-500 hover:bg-sky-600 text-white font-bold py-2 px-4 rounded-lg">Select Image</button>
+        </div>
+        <div id="cover-photo-editor" class="hidden">
+            <div class="mb-4 bg-gray-800 p-2 rounded-lg" style="height: 400px;">
+                <img id="cover-photo-crop-image" src="" alt="Image for cropping">
+            </div>
+            <button id="save-cover-photo-btn" class="w-full bg-green-500 hover:bg-green-600 text-white py-2 rounded-lg font-bold">Save Cover Photo</button>
+        </div>
+        <div id="cover-upload-loading" class="hidden text-center"><p>Uploading...</p></div>
     </div>
 </div>
 <div id="signup-modal" class="hidden fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
@@ -211,36 +279,43 @@
     let friendsCache = [];
     let currentChatId = null;
     let chatUnsubscribe = null;
+    let currentFeeling = null;
+    let storiesCache = [];
+    let storyUnsubscribe = null;
 
     // -------- LOGIN, SIGNUP, PROFILE EDIT --------
     function showLoginForm() {
         document.getElementById('main-content').classList.add('hidden');
-        document.getElementById('header-nav').classList.add('hidden');
+        document.getElementById('header-nav-center').classList.add('hidden');
+        document.getElementById('header-nav-right').classList.add('hidden');
         document.getElementById('loading-screen').innerHTML = `
-            <div class="w-full max-w-sm mx-auto bg-gray-800 p-8 rounded-2xl shadow-2xl animate-fade-in text-center">
-                <h2 class="mb-6 text-3xl font-bold text-sky-400">Sign In</h2>
-                <button id="google-login-btn" class="w-full flex items-center justify-center bg-white text-gray-900 py-3 rounded-xl font-semibold text-lg shadow hover:scale-[1.03] hover:shadow-lg transition mb-6 border border-gray-300">
-                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" class="w-6 h-6 mr-2 -ml-2"> Continue with Google
-                </button>
-                <div class="flex items-center my-4">
-                    <div class="flex-grow border-t border-gray-600"></div>
-                    <span class="mx-3 text-gray-400 font-medium">or</span>
-                    <div class="flex-grow border-t border-gray-600"></div>
+            <div class="w-full max-w-sm mx-auto bg-gray-800 p-8 rounded-2xl shadow-2xl animate-fade-in text-center relative h-screen flex flex-col justify-center">
+                <div>
+                    <h2 class="mb-6 text-3xl font-bold text-sky-400">Sign In</h2>
+                    <button id="google-login-btn" class="w-full flex items-center justify-center bg-white text-gray-900 py-3 rounded-xl font-semibold text-lg shadow hover:scale-[1.03] hover:shadow-lg transition mb-6 border border-gray-300">
+                        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" class="w-6 h-6 mr-2 -ml-2"> Continue with Google
+                    </button>
+                    <div class="flex items-center my-4">
+                        <div class="flex-grow border-t border-gray-600"></div>
+                        <span class="mx-3 text-gray-400 font-medium">or</span>
+                        <div class="flex-grow border-t border-gray-600"></div>
+                    </div>
+                    <form id="login-form" class="space-y-4 text-left">
+                        <div>
+                            <label for="login-email" class="block text-sm text-gray-400 font-semibold mb-1">Email</label>
+                            <input type="email" id="login-email" required class="w-full bg-gray-700 p-3 rounded-lg text-white border-2 border-gray-700 focus:border-sky-400 transition" placeholder="Email" autocomplete="email" />
+                        </div>
+                        <div>
+                            <label for="login-password" class="block text-sm text-gray-400 font-semibold mb-1">Password</label>
+                            <input type="password" id="login-password" required class="w-full bg-gray-700 p-3 rounded-lg text-white border-2 border-gray-700 focus:border-sky-400 transition" placeholder="Password" autocomplete="current-password" />
+                        </div>
+                        <button type="submit" class="w-full bg-sky-500 hover:bg-sky-600 py-3 rounded-xl font-bold text-white shadow transition">Sign In</button>
+                    </form>
+                    <button id="go-signup" class="w-full mt-2 bg-green-600 hover:bg-green-700 py-3 rounded-xl font-bold text-white shadow transition">Create Account</button>
+                    <div id="login-error" class="text-red-400 mt-4 font-semibold text-center"></div>
+                    <div id="login-loading" class="hidden mt-6 flex justify-center"><svg class="animate-spin h-8 w-8 text-sky-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-30" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-80" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/></svg></div>
                 </div>
-                <form id="login-form" class="space-y-4 text-left">
-                    <div>
-                        <label for="login-email" class="block text-sm text-gray-400 font-semibold mb-1">Email</label>
-                        <input type="email" id="login-email" required class="w-full bg-gray-700 p-3 rounded-lg text-white border-2 border-gray-700 focus:border-sky-400 transition" placeholder="Email" autocomplete="email" />
-                    </div>
-                    <div>
-                        <label for="login-password" class="block text-sm text-gray-400 font-semibold mb-1">Password</label>
-                        <input type="password" id="login-password" required class="w-full bg-gray-700 p-3 rounded-lg text-white border-2 border-gray-700 focus:border-sky-400 transition" placeholder="Password" autocomplete="current-password" />
-                    </div>
-                    <button type="submit" class="w-full bg-sky-500 hover:bg-sky-600 py-3 rounded-xl font-bold text-white shadow transition">Sign In</button>
-                </form>
-                <button id="go-signup" class="w-full mt-2 bg-green-600 hover:bg-green-700 py-3 rounded-xl font-bold text-white shadow transition">Create Account</button>
-                <div id="login-error" class="text-red-400 mt-4 font-semibold text-center"></div>
-                <div id="login-loading" class="hidden mt-6 flex justify-center"><svg class="animate-spin h-8 w-8 text-sky-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-30" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-80" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/></svg></div>
+                <a href="launchpad.html" class="text-gray-400 hover:text-white text-sm absolute bottom-4 left-4"><i class="fas fa-rocket mr-2"></i>Launchpad</a>
             </div>
         `;
         document.getElementById('loading-screen').classList.remove('hidden');
@@ -282,13 +357,16 @@
                 displayName,
                 email,
                 photoURL: userCredential.user.photoURL || `https://api.dicebear.com/7.x/initials/svg?seed=${userCredential.user.uid}`,
+                coverPhotoURL: '',
                 createdAt: new Date().toISOString(),
                 friends: [],
                 friendRequestsSent: [],
                 friendRequestsReceived: [],
+                blockedUsers: [],
                 posts: 0,
                 pageDescription: '',
-                aboutMe: ''
+                aboutMe: '',
+                pinnedPost: null
             });
             document.getElementById('signup-modal').classList.add('hidden');
         } catch (err) {
@@ -303,7 +381,6 @@
     onAuthStateChanged(auth, async (user) => {
         const mainContent = document.getElementById('main-content');
         const loadingScreen = document.getElementById('loading-screen');
-        const headerNav = document.getElementById('header-nav');
 
         if (user) {
             loadingScreen.innerHTML = '<p class="text-gray-400 text-lg">Loading your universe...</p>';
@@ -314,10 +391,13 @@
                 onSnapshot(userRef, (docSnap) => {
                     currentUserData = docSnap.data();
                     if (!currentUserData) return;
-                    renderProfileCard(currentUserData);
+                    renderProfileCard(currentUserData, true);
                     renderFriendsList(currentUserData.friends || []);
                     updateFriendRequestBadge(currentUserData.friendRequestsReceived || []);
-                    if(!document.getElementById('pages-page-container').classList.contains('hidden')) renderMyPage();
+                    // Only render my page if it's the active view
+                    if(document.getElementById('pages-page-container').dataset.userId === auth.currentUser.uid) {
+                        renderUserPage(auth.currentUser.uid)
+                    }
                 });
 
                 onSnapshot(collection(db, "users"), (snapshot) => {
@@ -332,9 +412,12 @@
                         displayName: user.displayName || 'New User',
                         email: user.email,
                         photoURL: user.photoURL || `https://api.dicebear.com/7.x/initials/svg?seed=${user.uid}`,
+                        coverPhotoURL: '',
                         createdAt: new Date().toISOString(),
                         friends: [], friendRequestsSent: [], friendRequestsReceived: [],
-                        posts: 0, pageDescription: '', aboutMe: ''
+                        blockedUsers: [],
+                        posts: 0, pageDescription: '', aboutMe: '',
+                        pinnedPost: null
                     });
                 }
 
@@ -347,9 +430,13 @@
                 setupChat();
                 setupUserMenu();
                 setupProfilePictureEditing();
+                setupCoverPhotoEditing();
+                setupFeelingModal();
+                setupStories();
+                setupGroups();
 
-                headerNav.classList.remove('hidden');
-                headerNav.classList.add('flex');
+                document.getElementById('header-nav-center').classList.remove('hidden');
+                document.getElementById('header-nav-right').classList.remove('hidden');
                 mainContent.classList.remove('hidden');
                 loadingScreen.classList.add('hidden');
 
@@ -360,33 +447,40 @@
             }
         } else {
             showLoginForm();
-            headerNav.classList.add('hidden');
             mainContent.classList.add('hidden');
             loadingScreen.classList.remove('hidden');
         }
     });
 
     // --- UI RENDERING FUNCTIONS ---
-    function renderProfileCard(userData) {
-        const profileCard = document.getElementById('profile-card');
-        profileCard.innerHTML = `<div id="profile-pic-container" class="w-24 h-24 rounded-full mx-auto bg-gray-700 mb-4 overflow-hidden relative cursor-pointer group">
-            <img src="${userData.photoURL}" alt="Profile Picture" class="w-full h-full object-cover">
-            <div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                <i class="fas fa-camera text-white text-2xl"></i>
-            </div>
-        </div>
-        <h2 class="text-xl font-semibold">${userData.displayName}</h2>
-        <p class="text-gray-400">${userData.email}</p>
-        <div class="flex justify-around mt-4 border-t border-gray-700 pt-4">
-            <div><p class="font-bold text-lg">${userData.posts || 0}</p><p class="text-gray-400 text-sm">Posts</p></div>
-            <div><p class="font-bold text-lg">${(userData.friends || []).length}</p><p class="text-gray-400 text-sm">Friends</p></div>
-        </div>
-        <button id="edit-profile-btn" class="mt-4 w-full bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg">Edit Profile</button>`;
+    function renderProfileCard(userData, isCurrentUserPage) {
+        const profileCardContainer = document.getElementById('profile-card-container');
+        let cardHTML = `
+            <div class="card text-center relative">
+                <div id="profile-pic-container" class="w-24 h-24 rounded-full mx-auto bg-gray-700 mb-4 overflow-hidden relative group ${isCurrentUserPage ? 'cursor-pointer' : ''}">
+                    <img src="${userData.photoURL}" alt="Profile Picture" class="w-full h-full object-cover">
+                    ${isCurrentUserPage ? `
+                    <div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                        <i class="fas fa-camera text-white text-2xl"></i>
+                    </div>` : ''}
+                </div>
+                <h2 class="text-xl font-semibold">${userData.displayName}</h2>
+                <p class="text-gray-400">${userData.email}</p>
+                <div class="flex justify-around mt-4 border-t border-gray-700 pt-4">
+                    <div><p class="font-bold text-lg">${userData.posts || 0}</p><p class="text-gray-400 text-sm">Posts</p></div>
+                    <div><p class="font-bold text-lg">${(userData.friends || []).length}</p><p class="text-gray-400 text-sm">Friends</p></div>
+                </div>
+                ${isCurrentUserPage ? `<button id="edit-profile-btn" class="mt-4 w-full bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg">Edit Profile</button>` : ''}
+            </div>`;
 
-        document.getElementById('profile-pic-container').onclick = () => {
-            document.getElementById('profile-pic-modal').classList.remove('hidden');
-        };
-        document.getElementById('edit-profile-btn').onclick = () => openProfileEditModal(userData);
+        profileCardContainer.innerHTML = cardHTML;
+
+        if (isCurrentUserPage) {
+            document.getElementById('profile-pic-container').onclick = () => {
+                document.getElementById('profile-pic-modal').classList.remove('hidden');
+            };
+            document.getElementById('edit-profile-btn').onclick = () => openProfileEditModal(userData);
+        }
     }
 
     async function renderFriendsList(friendIds) {
@@ -401,8 +495,14 @@
         friendsCache = friendSnaps.map(snap => ({ id: snap.id, ...snap.data() }));
         friendsCache.forEach(friend => {
             const friendElement = document.createElement('div');
-            friendElement.className = 'flex items-center';
-            friendElement.innerHTML = `<div class="w-10 h-10 rounded-full bg-gray-700 overflow-hidden"><img src="${friend.photoURL}" class="w-full h-full object-cover"></div><p class="ml-3 font-semibold">${friend.displayName}</p>`;
+            friendElement.className = 'flex items-center justify-between';
+            friendElement.innerHTML = `
+                <div class="flex items-center">
+                    <img src="${friend.photoURL}" class="w-10 h-10 rounded-full object-cover">
+                    <p class="ml-3 font-semibold">${friend.displayName}</p>
+                </div>
+                <button data-uid="${friend.id}" class="view-user-page-btn bg-sky-500 hover:bg-sky-600 text-white text-xs font-bold py-1 px-2 rounded">View Page</button>
+            `;
             friendsListContainer.appendChild(friendElement);
         });
         // Re-render chat UI to update dropdown
@@ -422,7 +522,7 @@
     function renderAllUsers() {
         const allUsersContainer = document.getElementById('all-users-container');
         allUsersContainer.innerHTML = '';
-        const otherUsers = allUsersCache.filter(u => u.id !== auth.currentUser.uid);
+        const otherUsers = allUsersCache.filter(u => u.id !== auth.currentUser.uid && !currentUserData.blockedUsers?.includes(u.id));
         if (otherUsers.length === 0) {
             allUsersContainer.innerHTML = `<p class="text-gray-400">No other users found.</p>`;
             return;
@@ -445,137 +545,148 @@
         });
     }
 
-    async function renderMyPage() {
+    async function renderUserPage(userId) {
+        const isCurrentUser = userId === auth.currentUser.uid;
         const pageContainer = document.getElementById('pages-page-container');
+        pageContainer.innerHTML = `<div class="card">Loading...</div>`;
+        pageContainer.dataset.userId = userId; // Keep track of whose page this is
+
+        const userDoc = await getDoc(doc(db, 'users', userId));
+        if (!userDoc.exists()) {
+            pageContainer.innerHTML = `<div class="card">User not found.</div>`;
+            return;
+        }
+        const userData = userDoc.data();
+
+        const coverPhotoUrl = userData.coverPhotoURL || 'https://images.unsplash.com/photo-1531297484001-80022131f5a1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2020&q=80';
+
         pageContainer.innerHTML = `
-            <div class="card">
-                <div class="text-center">
-                    <h2 class="text-2xl font-bold">${currentUserData.displayName}'s Page</h2>
-                    <p class="text-gray-400 mt-2">${currentUserData.pageDescription || 'No description yet. Click \'Edit Profile\' to add one.'}</p>
+            <div class="card p-0 overflow-hidden relative">
+                 <div class="h-48 bg-gray-700 relative group" id="cover-photo-container">
+                    <img src="${coverPhotoUrl}" class="w-full h-full object-cover"/>
+                    ${isCurrentUser ? `<button id="change-cover-btn" class="absolute top-4 right-4 bg-black bg-opacity-50 text-white py-1 px-3 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"><i class="fas fa-camera mr-2"></i>Change Cover</button>` : ''}
                 </div>
-                <div class="mt-6 border-t border-gray-700 pt-6">
-                    <h3 class="text-xl font-semibold">About Me</h3>
-                    <p class="text-gray-300 mt-2">${currentUserData.aboutMe || 'Nothing here yet. Click \'Edit Profile\' to add something.'}</p>
-                </div>
-                 <div class="mt-6 border-t border-gray-700 pt-6">
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-xl font-semibold">Events</h3>
-                        <button id="add-event-btn" class="bg-sky-500 hover:bg-sky-600 text-white font-bold py-2 px-4 rounded-lg text-sm">Add Event</button>
+                <div class="p-6 pt-0">
+                    <div class="card text-center relative p-0">
+                         <div class="w-24 h-24 rounded-full mx-auto bg-gray-700 mb-4 overflow-hidden relative -mt-12 border-4 border-gray-800 z-10 ${isCurrentUser ? 'group cursor-pointer' : ''}" ${isCurrentUser ? 'id="profile-pic-container"' : ''}>
+                            <img src="${userData.photoURL}" alt="Profile Picture" class="w-full h-full object-cover">
+                            ${isCurrentUser ? `<div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"><i class="fas fa-camera text-white text-2xl"></i></div>` : ''}
+                         </div>
+                         <div class="p-6 pt-2">
+                            <h2 class="text-xl font-semibold">${userData.displayName}</h2>
+                            <p class="text-gray-400">${userData.pageDescription || ''}</p>
+                            <div class="flex justify-around mt-4 border-t border-gray-700 pt-4">
+                                <div><p class="font-bold text-lg">${userData.posts || 0}</p><p class="text-gray-400 text-sm">Posts</p></div>
+                                <div><p class="font-bold text-lg">${(userData.friends || []).length}</p><p class="text-gray-400 text-sm">Friends</p></div>
+                            </div>
+                            ${isCurrentUser ? `<button id="edit-profile-btn" class="mt-4 w-full bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg">Edit Profile</button>` : ''}
+                         </div>
                     </div>
-                    <div id="add-event-form" class="hidden mb-4 p-4 bg-gray-800 rounded-lg">
-                        <input type="text" id="event-title" placeholder="Event Title" class="w-full bg-gray-700 rounded-lg p-2 mb-2">
-                        <textarea id="event-description" placeholder="Event Description" class="w-full bg-gray-700 rounded-lg p-2 mb-2"></textarea>
-                        <input type="date" id="event-date" class="w-full bg-gray-700 rounded-lg p-2 mb-2">
-                        <div>
-                            <button id="save-event-btn" class="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-lg">Save</button>
-                            <button id="cancel-event-btn" class="bg-gray-600 hover:bg-gray-500 text-white py-2 px-4 rounded-lg ml-2">Cancel</button>
-                        </div>
-                    </div>
-                    <div id="events-list" class="space-y-4"></div>
                 </div>
             </div>
+
             <div class="card mt-4">
-                <h2 class="text-xl font-semibold mb-4">My Posts</h2>
-                <div id="my-posts-container"></div>
+                <div class="flex border-b border-gray-700 mb-4">
+                    <button class="page-tab-btn active text-lg font-semibold py-2 px-4" data-tab="posts">Posts</button>
+                    <button class="page-tab-btn text-lg font-semibold py-2 px-4" data-tab="about">About</button>
+                    <button class="page-tab-btn text-lg font-semibold py-2 px-4" data-tab="photos">Photos</button>
+                </div>
+                <div id="page-content-container">
+                    <div id="page-posts-container"></div>
+                    <div id="page-about-container" class="hidden"></div>
+                    <div id="page-photos-container" class="hidden"></div>
+                </div>
             </div>`;
 
-        const myPostsContainer = document.getElementById('my-posts-container');
-        const q = query(collection(db, "posts"), where("authorId", "==", auth.currentUser.uid), orderBy("createdAt", "desc"));
-        onSnapshot(q, (snapshot) => {
-            myPostsContainer.innerHTML = '';
-            const pagePosts = snapshot.docs.filter(doc => doc.data().visibility?.includes('page'));
-            if (pagePosts.length === 0) {
-                myPostsContainer.innerHTML = `<p class="text-gray-400">You haven't posted to your page yet.</p>`;
-                return;
-            }
-            pagePosts.forEach(postDoc => {
-                myPostsContainer.appendChild(renderPostElement(postDoc.id, postDoc.data()));
+        if (isCurrentUser) {
+            document.getElementById('change-cover-btn').onclick = () => document.getElementById('cover-photo-modal').classList.remove('hidden');
+            document.getElementById('profile-pic-container').onclick = () => document.getElementById('profile-pic-modal').classList.remove('hidden');
+            document.getElementById('edit-profile-btn').onclick = () => openProfileEditModal(userData);
+        }
+
+        const tabButtons = pageContainer.querySelectorAll('.page-tab-btn');
+        const tabContainers = {
+            posts: document.getElementById('page-posts-container'),
+            about: document.getElementById('page-about-container'),
+            photos: document.getElementById('page-photos-container'),
+        };
+
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                tabButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+                Object.values(tabContainers).forEach(c => c.classList.add('hidden'));
+                tabContainers[button.dataset.tab].classList.remove('hidden');
             });
         });
 
-        // New event logic
-        const addEventBtn = document.getElementById('add-event-btn');
-        const addEventForm = document.getElementById('add-event-form');
-        const cancelEventBtn = document.getElementById('cancel-event-btn');
-        const saveEventBtn = document.getElementById('save-event-btn');
-        const eventsList = document.getElementById('events-list');
+        loadUserPosts(tabContainers.posts, userId, userData.pinnedPost);
+        loadUserAbout(tabContainers.about, userData);
+        loadUserPhotos(tabContainers.photos, userId);
+    }
 
-        addEventBtn.onclick = () => {
-            addEventForm.classList.remove('hidden');
-            addEventBtn.classList.add('hidden');
-        };
-        cancelEventBtn.onclick = () => {
-            addEventForm.classList.add('hidden');
-            addEventBtn.classList.remove('hidden');
-            document.getElementById('event-title').value = '';
-            document.getElementById('event-description').value = '';
-            document.getElementById('event-date').value = '';
-        };
-        saveEventBtn.onclick = async () => {
-            const title = document.getElementById('event-title').value;
-            const description = document.getElementById('event-description').value;
-            const date = document.getElementById('event-date').value;
-            if (!title || !date) {
-                alert('Event title and date are required.');
+    async function loadUserPosts(container, userId, pinnedPostId) {
+        container.innerHTML = '';
+        if (pinnedPostId) {
+            const pinnedPostRef = doc(db, "posts", pinnedPostId);
+            const pinnedPostSnap = await getDoc(pinnedPostRef);
+            if (pinnedPostSnap.exists()) {
+                const pinnedPostEl = renderPostElement(pinnedPostSnap.id, pinnedPostSnap.data(), true);
+                container.appendChild(pinnedPostEl);
+            }
+        }
+
+        const q = query(collection(db, "posts"), where("authorId", "==", userId), orderBy("createdAt", "desc"));
+        onSnapshot(q, (snapshot) => {
+            const regularPosts = snapshot.docs.filter(doc => doc.id !== pinnedPostId);
+            if (regularPosts.length === 0 && !pinnedPostId) {
+                container.innerHTML = `<p class="text-gray-400">This user hasn't posted anything yet.</p>`;
                 return;
             }
-
-            const newEvent = {
-                title,
-                description,
-                date,
-                createdAt: firestoreServerTimestamp(),
-                authorId: auth.currentUser.uid
-            };
-
-            try {
-                await addDoc(collection(db, 'users', auth.currentUser.uid, 'events'), newEvent);
-                cancelEventBtn.click();
-            } catch (error) {
-                console.error("Error adding event:", error);
-                alert("Failed to add event.");
-            }
-        };
-
-        const eventsQuery = query(collection(db, 'users', auth.currentUser.uid, 'events'), orderBy('date', 'asc'));
-        onSnapshot(eventsQuery, (snapshot) => {
-            eventsList.innerHTML = '';
-            if (snapshot.empty) {
-                eventsList.innerHTML = '<p class="text-gray-400">No upcoming events.</p>';
-            } else {
-                snapshot.forEach(docSnap => {
-                    const event = docSnap.data();
-                    const eventEl = document.createElement('div');
-                    eventEl.className = 'bg-gray-800 p-4 rounded-lg flex justify-between items-start';
-                    eventEl.innerHTML = `
-                        <div>
-                            <h4 class="font-bold text-lg">${event.title}</h4>
-                            <p class="text-sm text-sky-400">${new Date(event.date).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
-                            <p class="mt-2 text-gray-300">${event.description}</p>
-                        </div>
-                        <button data-event-id="${docSnap.id}" class="delete-event-btn text-gray-500 hover:text-red-500 text-2xl font-bold">&times;</button>
-                    `;
-                    eventsList.appendChild(eventEl);
-                });
-            }
-        });
-
-        eventsList.addEventListener('click', async (e) => {
-            if (e.target.classList.contains('delete-event-btn')) {
-                const eventId = e.target.dataset.eventId;
-                if (confirm('Are you sure you want to delete this event?')) {
-                    try {
-                        await deleteDoc(doc(db, 'users', auth.currentUser.uid, 'events', eventId));
-                    } catch (error) {
-                        console.error("Error deleting event:", error);
-                        alert("Failed to delete event.");
-                    }
+            regularPosts.forEach(postDoc => {
+                if (!document.getElementById(postDoc.id)) { // Avoid duplicates
+                    container.appendChild(renderPostElement(postDoc.id, postDoc.data()));
                 }
-            }
+            });
         });
     }
 
-    function renderPostElement(postId, post) {
+    function loadUserAbout(container, userData) {
+        const aboutMeText = userData.aboutMe || (userData.id === auth.currentUser.uid ? 'Nothing here yet. Click \'Edit Profile\' to add something.' : 'Nothing to see here.');
+        container.innerHTML = `
+            <div class="mb-6">
+                <h3 class="text-xl font-semibold">About Me</h3>
+                <p class="text-gray-300 mt-2">${aboutMeText}</p>
+            </div>
+        `;
+    }
+
+    function loadUserPhotos(container, userId) {
+        const q = query(collection(db, "posts"), where("authorId", "==", userId), where("mediaType", "==", "image"), orderBy("createdAt", "desc"));
+        onSnapshot(q, (snapshot) => {
+            container.innerHTML = '';
+            if (snapshot.empty) {
+                container.innerHTML = `<p class="text-gray-400">No photos to display.</p>`;
+                return;
+            }
+            const grid = document.createElement('div');
+            grid.className = 'grid grid-cols-3 gap-1';
+            snapshot.forEach(doc => {
+                const post = doc.data();
+                const img = document.createElement('img');
+                img.src = post.mediaUrl;
+                img.className = 'w-full h-full object-cover aspect-square cursor-pointer';
+                grid.appendChild(img);
+            });
+            container.appendChild(grid);
+        });
+    }
+
+    function renderPostElement(postId, post, isPinned = false) {
+        const postElement = document.createElement('div');
+        postElement.className = 'border-t border-gray-700 pt-4 mt-4';
+        postElement.id = postId;
+
         const postDate = post.createdAt?.toDate?.() ? post.createdAt.toDate().toLocaleString() : 'Just now';
         let mediaHTML = '';
         if (post.mediaUrl) {
@@ -583,18 +694,55 @@
                 ? `<video src="${post.mediaUrl}" class="mt-4 rounded-lg w-full" controls></video>`
                 : `<img src="${post.mediaUrl}" class="mt-4 rounded-lg max-h-96 w-full object-cover">`;
         }
-        const isLiked = post.likedBy?.includes(auth.currentUser.uid);
-        const postElement = document.createElement('div');
-        postElement.className = 'border-t border-gray-700 pt-4 mt-4';
+
+        const reactions = post.reactions || {};
+        const userReaction = reactions[auth.currentUser.uid];
+
+        let feelingHTML = '';
+        if (post.feeling) {
+            feelingHTML = `<span class="text-gray-400 ml-1">— is feeling ${post.feeling.emoji} ${post.feeling.text}</span>`;
+        }
+
+        const contentWithHashtags = post.content.replace(/#(\w+)/g, '<a href="#" class="hashtag-link text-sky-400 hover:underline" data-hashtag="$1">#$1</a>');
+
+        let reactionButtonHTML = `
+            <div class="like-button-container relative">
+                <button data-post-id="${postId}" class="like-button hover:text-sky-400 flex items-center ${userReaction ? 'liked' : ''}">
+                    <i class="fas fa-thumbs-up mr-2"></i>
+                    <span>${Object.keys(reactions).length}</span>
+                </button>
+                <div class="reactions-container absolute bottom-full mb-2 flex space-x-2 bg-gray-800 p-2 rounded-full shadow-lg hidden">
+                    <button data-post-id="${postId}" data-reaction="like" class="reaction-button text-2xl">👍</button>
+                    <button data-post-id="${postId}" data-reaction="love" class="reaction-button text-2xl">❤️</button>
+                    <button data-post-id="${postId}" data-reaction="haha" class="reaction-button text-2xl">😂</button>
+                    <button data-post-id="${postId}" data-reaction="wow" class="reaction-button text-2xl">😮</button>
+                    <button data-post-id="${postId}" data-reaction="sad" class="reaction-button text-2xl">😢</button>
+                    <button data-post-id="${postId}" data-reaction="angry" class="reaction-button text-2xl">😠</button>
+                </div>
+            </div>`;
+
         postElement.innerHTML = `
             <div class="flex items-start">
                 <img src="${post.authorPhotoURL}" alt="${post.authorName}" class="w-12 h-12 rounded-full">
                 <div class="ml-4 flex-grow">
-                    <div class="flex items-center"><h3 class="font-semibold">${post.authorName}</h3><span class="text-gray-400 text-sm ml-2">&middot; ${postDate}</span></div>
-                    <p class="mt-1">${post.content}</p>
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h3 class="font-semibold">${post.authorName}</h3>
+                            ${feelingHTML}
+                            <span class="text-gray-400 text-sm ml-2">&middot; ${postDate}</span>
+                        </div>
+                        <div class="relative post-options-container">
+                            <button class="post-options-btn text-gray-400 hover:text-white"><i class="fas fa-ellipsis-h"></i></button>
+                            <div class="post-options-menu hidden absolute right-0 mt-2 w-48 bg-gray-800 rounded-md shadow-lg py-1 ring-1 ring-black ring-opacity-5">
+                                ${post.authorId === auth.currentUser.uid ? `<a href="#" class="pin-post-btn block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700" data-post-id="${postId}">${isPinned ? 'Unpin Post' : 'Pin Post'}</a>` : ''}
+                                <a href="#" class="block-user-btn block px-4 py-2 text-sm text-red-400 hover:bg-gray-700" data-uid="${post.authorId}">Block User</a>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="mt-1">${contentWithHashtags}</p>
                     ${mediaHTML}
                     <div class="mt-4 flex items-center text-gray-400">
-                        <button data-post-id="${postId}" class="like-button hover:text-sky-400 flex items-center ${isLiked ? 'liked' : ''}"><i class="fas fa-thumbs-up mr-2"></i><span>${(post.likedBy || []).length}</span></button>
+                        ${reactionButtonHTML}
                         <button data-post-id="${postId}" class="comment-button hover:text-sky-400 ml-4"><i class="fas fa-comment mr-2"></i>${post.commentCount || 0}</button>
                         <button data-post-content="${post.content}" class="share-button hover:text-sky-400 ml-4"><i class="fas fa-share mr-2"></i>Share</button>
                     </div>
@@ -608,12 +756,15 @@
     function setupNavigation() {
         const pages = {
             feed: document.getElementById('feed-page-container'),
+            groups: document.getElementById('groups-page-container'),
+            hashtag: document.getElementById('hashtag-page-container'),
             mypage: document.getElementById('pages-page-container'),
             users: document.getElementById('all-users-page-container'),
             notifications: document.getElementById('notifications-page-container')
         };
         const navButtons = {
             feed: document.getElementById('home-button'),
+            groups: document.getElementById('groups-button'),
             mypage: document.getElementById('pages-button'),
             users: document.getElementById('friends-button'),
             notifications: document.getElementById('notifications-button')
@@ -622,18 +773,38 @@
         function showPage(pageKey) {
             Object.values(pages).forEach(p => p.classList.add('hidden'));
             Object.values(navButtons).forEach(b => b.classList.remove('active'));
-            pages[pageKey].classList.remove('hidden');
-            navButtons[pageKey].classList.add('active');
+            
+            const targetPage = pages[pageKey];
+            if (targetPage) {
+                targetPage.classList.remove('hidden');
+            }
 
-            if (pageKey === 'mypage') renderMyPage();
+            const targetButton = navButtons[pageKey];
+            if(targetButton) {
+                targetButton.classList.add('active');
+            }
+
+            // Special handling for pages
+            if (pageKey === 'mypage') {
+                renderUserPage(auth.currentUser.uid);
+                renderProfileCard(currentUserData, true);
+            } else {
+                renderProfileCard(currentUserData, false);
+            }
+
             if (pageKey === 'users') renderAllUsers();
             if (pageKey === 'notifications') displayFriendRequests();
+            if (pageKey === 'groups') renderGroupsPage();
         }
+
+        window.showPage = showPage;
+        window.renderUserPage = renderUserPage;
 
         navButtons.feed.onclick = (e) => { e.preventDefault(); showPage('feed'); };
         navButtons.mypage.onclick = (e) => { e.preventDefault(); showPage('mypage'); };
         navButtons.users.onclick = (e) => { e.preventDefault(); showPage('users'); };
         navButtons.notifications.onclick = (e) => { e.preventDefault(); showPage('notifications'); };
+        navButtons.groups.onclick = (e) => { e.preventDefault(); showPage('groups'); };
     }
 
     function setupPostCreation() {
@@ -669,16 +840,20 @@
 
             if ((!content && !uploadedMedia) || visibility.length === 0) return;
 
+            const hashtags = content.match(/#(\w+)/g)?.map(h => h.substring(1)) || [];
+
             try {
                 await addDoc(collection(db, 'posts'), {
                     authorId: auth.currentUser.uid,
                     authorName: currentUserData.displayName,
                     authorPhotoURL: currentUserData.photoURL,
                     content: content,
+                    feeling: currentFeeling,
+                    hashtags: hashtags,
                     mediaUrl: uploadedMedia?.url || '',
                     mediaType: uploadedMedia?.type || '',
                     createdAt: firestoreServerTimestamp(),
-                    likedBy: [],
+                    reactions: {},
                     commentCount: 0,
                     visibility: visibility
                 });
@@ -686,6 +861,8 @@
                 postContent.value = '';
                 mediaPreviewContainer.innerHTML = '';
                 uploadedMedia = null;
+                currentFeeling = null;
+                document.getElementById('feeling-display').classList.add('hidden');
             } catch (error) { console.error("Error creating post:", error); }
         };
     }
@@ -697,8 +874,8 @@
             feedContainer.innerHTML = '';
             const feedPosts = snapshot.docs.filter(doc => {
                 const postData = doc.data();
-                // Show post if visibility is not defined (old posts) OR if it includes 'feed'
-                return postData.visibility === undefined || postData.visibility.includes('feed');
+                const isBlocked = currentUserData.blockedUsers?.includes(postData.authorId);
+                return !isBlocked && (postData.visibility === undefined || postData.visibility.includes('feed'));
             });
 
             if (feedPosts.length === 0) {
@@ -710,10 +887,19 @@
             });
         });
 
-        feedContainer.addEventListener('click', handlePostInteraction);
+        document.body.addEventListener('click', handlePostInteraction);
     }
 
     function setupFriendAndUserPages() {
+        document.getElementById('friends-list-container').addEventListener('click', (e) => {
+            const viewBtn = e.target.closest('.view-user-page-btn');
+            if (viewBtn) {
+                const userId = viewBtn.dataset.uid;
+                showPage('mypage'); // Switch to the page container view
+                renderUserPage(userId);
+            }
+        });
+
         const allUsersContainer = document.getElementById('all-users-container');
         allUsersContainer.addEventListener('click', async (e) => {
             const uid = e.target.dataset.uid;
@@ -888,16 +1074,27 @@
 
         const likeButton = e.target.closest('.like-button');
         if (likeButton) {
-            const postId = likeButton.dataset.postId;
+            const reactionsContainer = likeButton.closest('.like-button-container').querySelector('.reactions-container');
+            if (reactionsContainer) {
+                reactionsContainer.classList.toggle('hidden');
+            }
+        }
+
+        const reactionButton = e.target.closest('.reaction-button');
+        if (reactionButton) {
+            const postId = reactionButton.dataset.postId;
+            const reaction = reactionButton.dataset.reaction;
             const postRef = doc(db, 'posts', postId);
+            
             const postSnap = await getDoc(postRef);
             if (postSnap.exists()) {
-                const likedBy = postSnap.data().likedBy || [];
-                if (likedBy.includes(user.uid)) {
-                    await updateDoc(postRef, { likedBy: arrayRemove(user.uid) });
-                } else {
-                    await updateDoc(postRef, { likedBy: arrayUnion(user.uid) });
+                let reactions = postSnap.data().reactions || {};
+                if (reactions[user.uid] === reaction) {
+                    delete reactions[user.uid];
+                } else { 
+                    reactions[user.uid] = reaction;
                 }
+                await updateDoc(postRef, { reactions: reactions });
             }
         }
 
@@ -922,6 +1119,61 @@
                 }
             }
         }
+
+        const replyButton = e.target.closest('.reply-button');
+        if(replyButton) {
+            const commentId = replyButton.dataset.commentId;
+            const container = document.getElementById(`reply-input-container-${commentId}`);
+            if(container.innerHTML !== '') { // Toggle off
+                container.innerHTML = '';
+            } else { // Toggle on
+                container.innerHTML = `
+                    <div class="flex mt-2">
+                        <input type="text" id="reply-input-${commentId}" class="w-full bg-gray-900 rounded-l-lg p-2 text-sm" placeholder="Write a reply...">
+                        <button data-comment-id="${commentId}" data-post-id="${replyButton.dataset.postId}" class="post-reply-button bg-sky-500 hover:bg-sky-600 text-white px-4 rounded-r-lg text-sm">Reply</button>
+                    </div>
+                `;
+            }
+        }
+
+        const postReplyButton = e.target.closest('.post-reply-button');
+        if(postReplyButton) {
+            await postReply(postReplyButton.dataset.postId, postReplyButton.dataset.commentId);
+        }
+
+        const hashtagLink = e.target.closest('.hashtag-link');
+        if (hashtagLink) {
+            e.preventDefault();
+            const hashtag = hashtagLink.dataset.hashtag;
+            showHashtagPage(hashtag);
+        }
+
+        const postOptionsBtn = e.target.closest('.post-options-btn');
+        if(postOptionsBtn) {
+            const menu = postOptionsBtn.nextElementSibling;
+            menu.classList.toggle('hidden');
+        }
+
+        const pinPostBtn = e.target.closest('.pin-post-btn');
+        if(pinPostBtn) {
+            const postId = pinPostBtn.dataset.postId;
+            const userRef = doc(db, 'users', auth.currentUser.uid);
+            if (currentUserData.pinnedPost === postId) {
+                await updateDoc(userRef, { pinnedPost: null });
+            } else {
+                await updateDoc(userRef, { pinnedPost: postId });
+            }
+        }
+
+        const blockUserBtn = e.target.closest('.block-user-btn');
+        if(blockUserBtn) {
+            const userIdToBlock = blockUserBtn.dataset.uid;
+            if (confirm('Are you sure you want to block this user?')) {
+                await updateDoc(doc(db, 'users', auth.currentUser.uid), {
+                    blockedUsers: arrayUnion(userIdToBlock)
+                });
+            }
+        }
     }
 
     async function postComment(e) {
@@ -940,7 +1192,8 @@
                 authorId: auth.currentUser.uid,
                 authorName: currentUserData.displayName,
                 authorPhotoURL: currentUserData.photoURL,
-                createdAt: firestoreServerTimestamp()
+                createdAt: firestoreServerTimestamp(),
+                replyCount: 0
             });
 
             await updateDoc(postRef, { commentCount: increment(1) });
@@ -948,6 +1201,55 @@
         } catch (error) {
             console.error("Error posting comment:", error);
         }
+    }
+
+    async function postReply(postId, commentId) {
+        const input = document.getElementById(`reply-input-${commentId}`);
+        const text = input.value.trim();
+        if (!text) return;
+
+        try {
+            const commentRef = doc(db, 'posts', postId, 'comments', commentId);
+            const repliesCollectionRef = collection(commentRef, 'replies');
+
+            await addDoc(repliesCollectionRef, {
+                text: text,
+                authorId: auth.currentUser.uid,
+                authorName: currentUserData.displayName,
+                authorPhotoURL: currentUserData.photoURL,
+                createdAt: firestoreServerTimestamp()
+            });
+
+            await updateDoc(commentRef, { replyCount: increment(1) });
+            document.getElementById(`reply-input-container-${commentId}`).innerHTML = '';
+        } catch (error) {
+            console.error("Error posting reply:", error);
+        }
+    }
+
+    function loadReplies(postId, commentId, container) {
+        const q = query(collection(db, 'posts', postId, 'comments', commentId, 'replies'), orderBy('createdAt', 'asc'));
+        onSnapshot(q, (snapshot) => {
+            container.innerHTML = '';
+            snapshot.forEach(doc => {
+                const reply = doc.data();
+                const replyEl = document.createElement('div');
+                replyEl.className = 'flex items-start text-sm pt-2';
+                const replyDate = reply.createdAt?.toDate?.() ? reply.createdAt.toDate().toLocaleDateString() : 'Just now';
+                replyEl.innerHTML = `
+                    <img src="${reply.authorPhotoURL}" class="w-8 h-8 rounded-full mr-2">
+                    <div>
+                        <p class="bg-gray-900 rounded-lg px-3 py-2">
+                            <span class="font-semibold text-sky-400">${reply.authorName}</span>
+                            <span class="text-gray-400 text-xs ml-2">&middot; ${replyDate}</span>
+                            <br>
+                            ${reply.text}
+                        </p>
+                    </div>
+                `;
+                container.appendChild(replyEl);
+            });
+        });
     }
 
     async function loadComments(postId, container) {
@@ -975,24 +1277,214 @@
                 commentsLoading.classList.add('hidden');
                 snapshot.forEach(doc => {
                     const comment = doc.data();
+                    const commentId = doc.id;
                     const commentEl = document.createElement('div');
-                    commentEl.className = 'flex items-start text-sm pt-2';
+                    commentEl.className = 'comment-container';
                     const commentDate = comment.createdAt?.toDate?.() ? comment.createdAt.toDate().toLocaleDateString() : 'Just now';
                     commentEl.innerHTML = `
-                        <img src="${comment.authorPhotoURL}" class="w-8 h-8 rounded-full mr-2">
-                        <div>
-                            <p class="bg-gray-700 rounded-lg px-3 py-2">
-                                <span class="font-semibold text-sky-400">${comment.authorName}</span>
-                                <span class="text-gray-400 text-xs ml-2">&middot; ${commentDate}</span>
-                                <br>
-                                ${comment.text}
-                            </p>
+                        <div class="flex items-start text-sm pt-2">
+                            <img src="${comment.authorPhotoURL}" class="w-8 h-8 rounded-full mr-2">
+                            <div>
+                                <p class="bg-gray-700 rounded-lg px-3 py-2">
+                                    <span class="font-semibold text-sky-400">${comment.authorName}</span>
+                                    <span class="text-gray-400 text-xs ml-2">&middot; ${commentDate}</span>
+                                    <br>
+                                    ${comment.text}
+                                </p>
+                                <div class="pl-2 pt-1">
+                                    <button class="reply-button text-xs font-semibold text-gray-400 hover:text-sky-400" data-post-id="${postId}" data-comment-id="${commentId}">Reply</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="ml-10">
+                            <div id="reply-input-container-${commentId}"></div>
+                            <div id="replies-list-${commentId}" class="space-y-2"></div>
                         </div>
                     `;
                     commentsList.appendChild(commentEl);
+
+                    if(comment.replyCount > 0) {
+                        loadReplies(postId, commentId, document.getElementById(`replies-list-${commentId}`));
+                    }
                 });
             }
         });
+    }
+
+    function showHashtagPage(hashtag) {
+        window.showPage('hashtag');
+        const container = document.getElementById('hashtag-page-container');
+        container.innerHTML = `<div class="card"><h2 class="text-2xl font-bold mb-4">#${hashtag}</h2><div id="hashtag-posts-container">Loading...</div></div>`;
+
+        const postsContainer = document.getElementById('hashtag-posts-container');
+        const q = query(collection(db, "posts"), where("hashtags", "array-contains", hashtag), orderBy("createdAt", "desc"));
+
+        onSnapshot(q, (snapshot) => {
+            postsContainer.innerHTML = '';
+            if (snapshot.empty) {
+                postsContainer.innerHTML = `<p class="text-gray-400">No posts found for this hashtag.</p>`;
+                return;
+            }
+            snapshot.forEach(postDoc => {
+                postsContainer.appendChild(renderPostElement(postDoc.id, postDoc.data()));
+            });
+        });
+    }
+
+    function renderGroupsPage() {
+        const container = document.getElementById('groups-page-container');
+        container.innerHTML = `
+            <div id="groups-list-container">
+                <div class="card">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-2xl font-bold">Groups</h2>
+                        <button id="create-group-btn" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg">Create Group</button>
+                    </div>
+                    <div id="groups-list"></div>
+                </div>
+            </div>
+            <div id="single-group-container" class="hidden"></div>
+        `;
+
+        document.getElementById('create-group-btn').onclick = () => {
+            document.getElementById('create-group-modal').classList.remove('hidden');
+        };
+
+        const groupsList = document.getElementById('groups-list');
+        const q = query(collection(db, "groups"), orderBy("createdAt", "desc"));
+        onSnapshot(q, (snapshot) => {
+            groupsList.innerHTML = '';
+            if(snapshot.empty) {
+                groupsList.innerHTML = `<p class="text-gray-400">No groups yet. Why not create one?</p>`;
+                return;
+            }
+            snapshot.forEach(doc => {
+                const group = doc.data();
+                const groupId = doc.id;
+                const groupEl = document.createElement('div');
+                groupEl.className = 'p-4 bg-gray-800 rounded-lg mb-2 cursor-pointer hover:bg-gray-700';
+                groupEl.innerHTML = `
+                    <h3 class="font-semibold text-lg">${group.name}</h3>
+                    <p class="text-gray-400 text-sm">${group.description}</p>
+                `;
+                groupEl.addEventListener('click', () => showGroupPage(groupId));
+                groupsList.appendChild(groupEl);
+            });
+        });
+    }
+
+    async function showGroupPage(groupId) {
+        document.getElementById('groups-list-container').classList.add('hidden');
+        const container = document.getElementById('single-group-container');
+        container.classList.remove('hidden');
+        container.innerHTML = '<p class="text-gray-400">Loading group...</p>';
+
+        const groupRef = doc(db, 'groups', groupId);
+        const groupSnap = await getDoc(groupRef);
+
+        if (!groupSnap.exists()) {
+            container.innerHTML = '<p class="text-red-400">Group not found.</p>';
+            return;
+        }
+        const groupData = groupSnap.data();
+
+        container.innerHTML = `
+            <div class="card">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h2 class="text-2xl font-bold">${groupData.name}</h2>
+                        <p class="text-gray-400">${groupData.description}</p>
+                    </div>
+                    <div>
+                        <button id="back-to-groups-list" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg">Back</button>
+                        <button id="invite-to-group-btn" class="bg-sky-500 hover:bg-sky-600 text-white font-bold py-2 px-4 rounded-lg ml-2">Invite</button>
+                    </div>
+                </div>
+            </div>
+            <div class="card mt-4">
+                <h2 class="text-xl font-semibold mb-4">Create a Post in ${groupData.name}</h2>
+                <textarea id="group-post-content" class="w-full bg-gray-800 rounded-lg p-2" placeholder="What's on your mind?"></textarea>
+                <div class="flex justify-end items-center mt-4">
+                    <button id="create-group-post-button" data-group-id="${groupId}" class="bg-sky-500 hover:bg-sky-600 text-white font-bold py-2 px-4 rounded-lg">Post</button>
+                </div>
+            </div>
+            <div class="card mt-4">
+                <h2 class="text-xl font-semibold mb-4">Group Feed</h2>
+                <div id="group-feed-container"></div>
+            </div>
+        `;
+
+        document.getElementById('back-to-groups-list').addEventListener('click', () => {
+            container.classList.add('hidden');
+            document.getElementById('groups-list-container').classList.remove('hidden');
+        });
+        
+        // TODO: Invite button logic
+        
+        document.getElementById('create-group-post-button').addEventListener('click', async () => {
+            const content = document.getElementById('group-post-content').value.trim();
+            if (!content) return;
+
+            try {
+                await addDoc(collection(db, 'posts'), {
+                    authorId: auth.currentUser.uid,
+                    authorName: currentUserData.displayName,
+                    authorPhotoURL: currentUserData.photoURL,
+                    content: content,
+                    groupId: groupId, // Link post to the group
+                    createdAt: firestoreServerTimestamp(),
+                    reactions: {},
+                    commentCount: 0,
+                    visibility: ['group'] // Special visibility for group posts
+                });
+                document.getElementById('group-post-content').value = '';
+            } catch (error) {
+                console.error("Error creating group post:", error);
+            }
+        });
+
+        const feedContainer = document.getElementById('group-feed-container');
+        const q = query(collection(db, "posts"), where("groupId", "==", groupId), orderBy("createdAt", "desc"));
+        onSnapshot(q, (snapshot) => {
+            feedContainer.innerHTML = '';
+            if (snapshot.empty) {
+                feedContainer.innerHTML = '<p class="text-gray-400">No posts in this group yet. Be the first!</p>';
+                return;
+            }
+            snapshot.forEach(postDoc => {
+                feedContainer.appendChild(renderPostElement(postDoc.id, postDoc.data()));
+            });
+        });
+    }
+
+    function setupGroups() {
+        const modal = document.getElementById('create-group-modal');
+        const closeBtn = document.getElementById('close-create-group-modal');
+        const form = document.getElementById('create-group-form');
+
+        closeBtn.onclick = () => modal.classList.add('hidden');
+
+        form.onsubmit = async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('group-name-input').value;
+            const description = document.getElementById('group-description-input').value;
+
+            if(!name) return;
+
+            try {
+                await addDoc(collection(db, 'groups'), {
+                    name: name,
+                    description: description,
+                    createdAt: firestoreServerTimestamp(),
+                    ownerId: auth.currentUser.uid,
+                    members: [auth.currentUser.uid]
+                });
+                modal.classList.add('hidden');
+                form.reset();
+            } catch (error) {
+                document.getElementById('create-group-error').textContent = error.message;
+            }
+        };
     }
 
     function setupUserMenu() {
@@ -1092,6 +1584,339 @@
                 }
             }, 'image/jpeg');
         };
+    }
+
+    function setupCoverPhotoEditing() {
+        const modal = document.getElementById('cover-photo-modal');
+        const closeBtn = document.getElementById('close-cover-modal');
+        const selectImageBtn = document.getElementById('select-cover-image-btn');
+        const uploadInput = document.getElementById('cover-photo-upload-input');
+        const editorDiv = document.getElementById('cover-photo-editor');
+        const cropImage = document.getElementById('cover-photo-crop-image');
+        const saveBtn = document.getElementById('save-cover-photo-btn');
+        const loadingDiv = document.getElementById('cover-upload-loading');
+        let cropper = null;
+
+        closeBtn.onclick = () => {
+            modal.classList.add('hidden');
+            if (cropper) {
+                cropper.destroy();
+                cropper = null;
+            }
+            editorDiv.classList.add('hidden');
+            uploadInput.value = '';
+        };
+
+        selectImageBtn.onclick = () => uploadInput.click();
+
+        uploadInput.onchange = (e) => {
+            if (e.target.files && e.target.files[0]) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    cropImage.src = event.target.result;
+                    editorDiv.classList.remove('hidden');
+                    if (cropper) {
+                        cropper.destroy();
+                    }
+                    cropper = new Cropper(cropImage, {
+                        aspectRatio: 16 / 6,
+                        viewMode: 2,
+                        background: false,
+                        autoCropArea: 1
+                    });
+                };
+                reader.readAsDataURL(e.target.files[0]);
+            }
+        };
+
+        saveBtn.onclick = async () => {
+            if (!cropper) return;
+
+            loadingDiv.classList.remove('hidden');
+            saveBtn.disabled = true;
+
+            cropper.getCroppedCanvas({
+                width: 1200,
+                height: 450,
+            }).toBlob(async (blob) => {
+                const formData = new FormData();
+                formData.append('file', blob);
+                formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+
+                try {
+                    const res = await fetch(CLOUDINARY_URL, { method: 'POST', body: formData });
+                    const data = await res.json();
+                    const newCoverURL = data.secure_url;
+
+                    await updateDoc(doc(db, 'users', auth.currentUser.uid), { coverPhotoURL: newCoverURL });
+
+                    loadingDiv.classList.add('hidden');
+                    saveBtn.disabled = false;
+                    closeBtn.onclick();
+                } catch (err) {
+                    console.error("Error uploading cover photo:", err);
+                    loadingDiv.classList.add('hidden');
+                    saveBtn.disabled = false;
+                    alert('Upload failed. Please try again.');
+                }
+            }, 'image/jpeg');
+        };
+    }
+
+    function setupFeelingModal() {
+        const feelingButton = document.getElementById('feeling-button');
+        const modal = document.getElementById('feeling-modal');
+        const closeBtn = document.getElementById('close-feeling-modal');
+        const emojiGrid = document.getElementById('emoji-grid');
+        const saveBtn = document.getElementById('save-feeling-btn');
+        const activityInput = document.getElementById('activity-input');
+        const feelingDisplay = document.getElementById('feeling-display');
+
+        const emojis = ['😄', '🥰', '🥳', '🤩', '🤔', '😢', '😠', '🤯', '😴', '🎉', '✈️', '🍕', '🎮', '🎬', '🎵', '📖'];
+        let selectedEmoji = null;
+
+        emojiGrid.innerHTML = emojis.map(emoji => `<div class="p-2 rounded-full hover:bg-sky-500 transition-colors">${emoji}</div>`).join('');
+
+        feelingButton.onclick = () => modal.classList.remove('hidden');
+        closeBtn.onclick = () => modal.classList.add('hidden');
+
+        emojiGrid.addEventListener('click', (e) => {
+            if (e.target.tagName === 'DIV') {
+                // Clear previous selection
+                Array.from(emojiGrid.children).forEach(child => child.classList.remove('bg-sky-500'));
+                // Select new one
+                e.target.classList.add('bg-sky-500');
+                selectedEmoji = e.target.textContent;
+            }
+        });
+
+        saveBtn.onclick = () => {
+            const activityText = activityInput.value.trim();
+            if (!selectedEmoji || !activityText) {
+                alert('Please select an emoji and enter an activity.');
+                return;
+            }
+
+            currentFeeling = { emoji: selectedEmoji, text: activityText };
+            
+            feelingDisplay.innerHTML = `
+                <span>— is feeling ${currentFeeling.emoji} ${currentFeeling.text}</span>
+                <button id="remove-feeling" class="ml-2 text-red-500 font-bold">&times;</button>
+            `;
+            feelingDisplay.classList.remove('hidden');
+            feelingDisplay.classList.add('flex');
+
+            modal.classList.add('hidden');
+        };
+
+        feelingDisplay.addEventListener('click', (e) => {
+            if (e.target.id === 'remove-feeling') {
+                currentFeeling = null;
+                feelingDisplay.classList.add('hidden');
+                feelingDisplay.innerHTML = '';
+            }
+        });
+    }
+
+    function setupStories() {
+        const storiesContainer = document.getElementById('stories-container');
+        if (storyUnsubscribe) storyUnsubscribe();
+
+        const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+        const q = query(collection(db, "stories"), where('createdAt', '>', twentyFourHoursAgo), orderBy('createdAt', 'desc'));
+
+        storyUnsubscribe = onSnapshot(q, (snapshot) => {
+            storiesCache = snapshot.docs.map(d => ({id: d.id, ...d.data()}));
+            renderStoriesBar();
+        });
+
+        storiesContainer.addEventListener('click', (e) => {
+            const storyAuthorId = e.target.closest('.story-circle')?.dataset.authorId;
+            if (storyAuthorId) {
+                openStoryViewer(storyAuthorId);
+            }
+
+            const createStoryBtn = e.target.closest('#create-story-btn');
+            if(createStoryBtn) {
+                document.getElementById('create-story-modal').classList.remove('hidden');
+                document.getElementById('story-upload-input').click();
+            }
+        });
+
+        setupStoryCreation();
+    }
+
+    function setupStoryCreation() {
+        const modal = document.getElementById('create-story-modal');
+        const closeBtn = document.getElementById('close-create-story-modal');
+        const uploadInput = document.getElementById('story-upload-input');
+        const previewContainer = document.getElementById('story-upload-preview');
+        const errorDiv = document.getElementById('story-upload-error');
+        const postBtn = document.getElementById('post-story-btn');
+        let uploadedStoryMedia = null;
+
+        closeBtn.onclick = () => {
+            modal.classList.add('hidden');
+            previewContainer.innerHTML = '';
+            errorDiv.textContent = '';
+            postBtn.classList.add('hidden');
+            uploadedStoryMedia = null;
+        };
+
+        uploadInput.onchange = async (e) => {
+            if (!e.target.files[0]) return;
+            const file = e.target.files[0];
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+            previewContainer.innerHTML = `<p class="text-gray-400">Uploading...</p>`;
+            postBtn.classList.add('hidden');
+
+            try {
+                const res = await fetch(CLOUDINARY_URL, { method: 'POST', body: formData });
+                const data = await res.json();
+                uploadedStoryMedia = { url: data.secure_url, type: data.resource_type };
+                previewContainer.innerHTML = data.resource_type.startsWith('video')
+                    ? `<video src="${uploadedStoryMedia.url}" class="rounded-lg max-h-full mx-auto" controls></video>`
+                    : `<img src="${uploadedStoryMedia.url}" class="rounded-lg max-h-full mx-auto">`;
+                postBtn.classList.remove('hidden');
+                errorDiv.textContent = '';
+            } catch (err) {
+                previewContainer.innerHTML = '';
+                errorDiv.textContent = 'Upload failed. Please try again.';
+                uploadedStoryMedia = null;
+            }
+        };
+
+        postBtn.onclick = async () => {
+            if (!uploadedStoryMedia) return;
+
+            try {
+                await addDoc(collection(db, 'stories'), {
+                    authorId: auth.currentUser.uid,
+                    authorName: currentUserData.displayName,
+                    authorPhotoURL: currentUserData.photoURL,
+                    mediaUrl: uploadedStoryMedia.url,
+                    mediaType: uploadedStoryMedia.type,
+                    createdAt: firestoreServerTimestamp(),
+                });
+                closeBtn.onclick();
+            } catch (error) {
+                console.error("Error creating story:", error);
+                errorDiv.textContent = 'Failed to post story.';
+            }
+        };
+    }
+
+    function renderStoriesBar() {
+        const storiesContainer = document.getElementById('stories-container');
+        const storiesByAuthor = storiesCache.reduce((acc, story) => {
+            if (!acc[story.authorId]) {
+                acc[story.authorId] = {
+                    authorName: story.authorName,
+                    authorPhotoURL: story.authorPhotoURL,
+                    stories: []
+                };
+            }
+            acc[story.authorId].stories.push(story);
+            return acc;
+        }, {});
+
+        let storiesHTML = '<div class="flex space-x-4 overflow-x-auto p-2">'
+
+        // Add Your Story button
+        storiesHTML += `
+            <div id="create-story-btn" class="text-center flex-shrink-0">
+                <div class="w-16 h-16 rounded-full bg-gray-700 flex items-center justify-center cursor-pointer border-2 border-dashed border-gray-500 hover:border-sky-400">
+                    <i class="fas fa-plus text-2xl text-gray-400"></i>
+                </div>
+                <p class="text-xs mt-1">Your Story</p>
+            </div>
+        `;
+
+        for (const authorId in storiesByAuthor) {
+            const authorData = storiesByAuthor[authorId];
+            storiesHTML += `
+                <div class="text-center flex-shrink-0 story-circle" data-author-id="${authorId}">
+                    <div class="w-16 h-16 rounded-full p-1 bg-gradient-to-tr from-yellow-400 to-fuchsia-600 cursor-pointer">
+                        <img src="${authorData.authorPhotoURL}" class="w-full h-full rounded-full object-cover border-2 border-gray-900">
+                    </div>
+                    <p class="text-xs mt-1 truncate w-16">${authorData.authorName}</p>
+                </div>
+            `;
+        }
+
+        storiesHTML += '</div>';
+        storiesContainer.innerHTML = storiesHTML;
+    }
+
+    function openStoryViewer(authorId) {
+        const modal = document.getElementById('story-viewer-modal');
+        const content = document.getElementById('story-content');
+        const closeBtn = document.getElementById('close-story-viewer');
+        const nextBtn = document.getElementById('story-next');
+        const prevBtn = document.getElementById('story-prev');
+
+        const authorStories = storiesCache.filter(s => s.authorId === authorId);
+        let currentIndex = 0;
+        let storyTimeout;
+
+        function showStory(index) {
+            clearTimeout(storyTimeout);
+            const story = authorStories[index];
+            let mediaHTML = '';
+            if (story.mediaType.startsWith('image')) {
+                mediaHTML = `<img src="${story.mediaUrl}" class="max-h-full max-w-full object-contain">`;
+                storyTimeout = setTimeout(nextStory, 7000);
+            } else {
+                mediaHTML = `<video id="story-video-player" src="${story.mediaUrl}" class="max-h-full max-w-full object-contain" autoplay muted></video>`;
+            }
+
+            content.innerHTML = `
+                <div class="absolute top-0 left-0 right-0 p-4 flex items-center bg-gradient-to-b from-black/50 to-transparent">
+                    <img src="${story.authorPhotoURL}" class="w-10 h-10 rounded-full mr-2">
+                    <span class="font-semibold text-white">${story.authorName}</span>
+                </div>
+                ${mediaHTML}
+            `;
+
+            if (story.mediaType.startsWith('video')) {
+                const videoPlayer = document.getElementById('story-video-player');
+                videoPlayer.onended = nextStory;
+            }
+        }
+
+        function nextStory() {
+            if (currentIndex < authorStories.length - 1) {
+                currentIndex++;
+                showStory(currentIndex);
+            } else {
+                modal.classList.add('hidden');
+            }
+        }
+
+        showStory(currentIndex);
+
+        nextBtn.onclick = () => {
+            if (currentIndex < authorStories.length - 1) {
+                currentIndex++;
+                showStory(currentIndex);
+            }
+        };
+
+        prevBtn.onclick = () => {
+            if (currentIndex > 0) {
+                currentIndex--;
+                showStory(currentIndex);
+            }
+        };
+
+        closeBtn.onclick = () => {
+            clearTimeout(storyTimeout);
+            modal.classList.add('hidden');
+        };
+
+        modal.classList.remove('hidden');
     }
 
 </script>
