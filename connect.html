@@ -21,11 +21,10 @@
             padding: 1.5rem;
             box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3), 0 4px 6px -2px rgba(0,0,0,0.25);
         }
-        .like-button.liked, .nav-button.active {
+        .nav-button.active, .like-button.liked {
             color: #38bdf8;
         }
-        .profile-edit-btn { position: absolute; top: 0.5rem; right: 0.5rem; background: #38bdf8; color: #fff; border-radius: 9999px; padding: 4px 8px; font-size: 0.8rem; z-index:2;}
-        .profile-edit-modal input, .profile-edit-modal button {margin-bottom:1rem;}
+        .profile-edit-modal input, .profile-edit-modal button, .profile-edit-modal textarea {margin-bottom:1rem;}
         #profile-pic-crop {max-width:100%;}
         .animate-fade-in { animation: fade-in 0.5s ease; }
         @keyframes fade-in { from { opacity: 0; transform: translateY(12px);} to { opacity: 1; transform: none;} }
@@ -42,6 +41,7 @@
     </div>
     <div id="header-nav" class="hidden items-center space-x-4">
         <a href="#" id="home-button" class="nav-button text-gray-300 hover:text-white active"><i class="fas fa-home"></i></a>
+        <a href="#" id="pages-button" class="nav-button text-gray-300 hover:text-white"><i class="fas fa-file-alt"></i></a>
         <a href="#" id="friends-button" class="nav-button text-gray-300 hover:text-white"><i class="fas fa-user-friends"></i></a>
         <a href="#" id="notifications-button" class="nav-button text-gray-300 hover:text-white relative"><i class="fas fa-bell"></i><span id="friend-request-badge" class="hidden absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center"></span></a>
         <div id="user-menu" class="relative">
@@ -59,8 +59,8 @@
             <div class="sticky top-20">
                 <div class="card text-center relative" id="profile-card"></div>
                 <div class="card mt-4">
-                    <h2 class="text-xl font-semibold mb-4">Online</h2>
-                    <div id="online-users-container" class="space-y-4"></div>
+                    <h2 class="text-xl font-semibold mb-4">Friends</h2>
+                    <div id="friends-list-container" class="space-y-4"></div>
                 </div>
             </div>
         </div>
@@ -79,18 +79,23 @@
                         </div>
                         <button id="create-post-button" class="bg-sky-500 hover:bg-sky-600 text-white font-bold py-2 px-4 rounded-lg">Post</button>
                     </div>
+                     <div class="flex items-center space-x-4 mt-3 text-sm text-gray-400">
+                        <span>Post to:</span>
+                        <label class="flex items-center"><input type="checkbox" id="post-visibility-feed" class="mr-1 bg-gray-700 border-gray-600 rounded" checked>Feed</label>
+                        <label class="flex items-center"><input type="checkbox" id="post-visibility-page" class="mr-1 bg-gray-700 border-gray-600 rounded" checked>My Page</label>
+                    </div>
                 </div>
                 <div class="card mt-4">
                     <h2 class="text-xl font-semibold mb-4">Feed</h2>
                     <div id="feed-container"></div>
                 </div>
             </div>
-            <!-- Friends Page -->
-            <div id="friends-page-container" class="hidden">
+            <!-- User's Page Container -->
+            <div id="pages-page-container" class="hidden"></div>
+            <!-- All Users Page -->
+            <div id="all-users-page-container" class="hidden">
                 <div class="card">
-                    <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-xl font-semibold">All Users</h2>
-                    </div>
+                    <h2 class="text-xl font-semibold mb-4">All Users</h2>
                     <div id="all-users-container" class="space-y-4"></div>
                 </div>
             </div>
@@ -102,7 +107,14 @@
                 </div>
             </div>
         </div>
-        <div class="md:col-span-1"></div>
+        <div class="md:col-span-1">
+            <div class="sticky top-20">
+                 <div class="card">
+                    <h2 class="text-xl font-semibold mb-4">Chat</h2>
+                    <div id="chat-widget"></div>
+                </div>
+            </div>
+        </div>
     </div>
 </main>
 
@@ -110,54 +122,57 @@
     <p class="text-gray-400 text-lg">Authenticating...</p>
 </div>
 
-<!-- Profile Edit Modal -->
+<!-- Modals -->
 <div id="profile-edit-modal" class="profile-edit-modal hidden fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
     <div class="card w-full max-w-md relative">
         <button id="close-profile-edit" class="absolute top-2 right-4 px-3 py-1 rounded-full bg-gray-600 text-white">&times;</button>
-        <h2 class="text-xl font-semibold mb-4">Edit Profile</h2>
+        <h2 class="text-xl font-semibold mb-4">Edit Profile & Page</h2>
         <form id="profile-edit-form" class="space-y-4">
-            <div id="profile-pic-crop-container" class="mb-2">
-                <img id="profile-pic-crop" src="" alt="Crop your new profile picture" class="rounded-full bg-gray-700"/>
-            </div>
-            <input type="file" id="profile-pic-upload" accept="image/*" class="block w-full mb-2 bg-gray-800 rounded p-2 text-white"/>
-            <button type="button" id="crop-profile-pic" class="block w-full bg-sky-500 hover:bg-sky-600 text-white py-2 rounded-lg mb-2">Crop & Save</button>
             <input type="text" id="display-name-edit" required class="w-full bg-gray-800 rounded-lg p-2 text-white" placeholder="Display Name"/>
+            <label class="text-gray-400 text-sm">Page Description</label>
+            <textarea id="page-description-edit" class="w-full bg-gray-800 rounded-lg p-2 text-white" placeholder="A short description for your page..."></textarea>
+            <label class="text-gray-400 text-sm">About Me</label>
+            <textarea id="about-me-edit" class="w-full bg-gray-800 rounded-lg p-2 text-white" placeholder="Tell everyone a little about yourself..."></textarea>
             <button type="submit" class="w-full bg-green-500 hover:bg-green-600 text-white py-2 rounded-lg font-bold">Save Changes</button>
         </form>
         <div id="profile-edit-error" class="text-red-400 mt-2 text-center"></div>
     </div>
 </div>
-
-<!-- Feeling/Activity Modal -->
 <div id="feeling-modal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50">
     <div class="card w-full max-w-md">
         <h2 class="text-xl font-semibold mb-4">How are you feeling?</h2>
         <div id="emoji-grid" class="grid grid-cols-6 gap-4 text-3xl cursor-pointer"></div>
     </div>
 </div>
-
-<!-- Sign Up Modal -->
+<div id="profile-pic-modal" class="hidden fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
+    <div class="card w-full max-w-lg relative">
+        <button id="close-pic-modal" class="absolute top-2 right-4 px-3 py-1 rounded-full bg-gray-600 text-white">&times;</button>
+        <h2 class="text-xl font-semibold mb-4">Update Profile Picture</h2>
+        <div class="text-center mb-4">
+            <p class="text-gray-400">Upload a new image to crop.</p>
+            <input type="file" id="profile-pic-upload-input" class="hidden" accept="image/*">
+            <button id="select-image-btn" class="mt-2 bg-sky-500 hover:bg-sky-600 text-white font-bold py-2 px-4 rounded-lg">Select Image</button>
+        </div>
+        <div id="profile-pic-editor" class="hidden">
+            <div class="mb-4 bg-gray-800 p-2 rounded-lg" style="height: 400px;">
+                <img id="profile-pic-crop-image" src="" alt="Image for cropping">
+            </div>
+            <button id="save-profile-pic-btn" class="w-full bg-green-500 hover:bg-green-600 text-white py-2 rounded-lg font-bold">Save Picture</button>
+        </div>
+        <div id="pic-upload-loading" class="hidden text-center"><p>Uploading...</p></div>
+    </div>
+</div>
 <div id="signup-modal" class="hidden fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
     <div class="w-full max-w-sm mx-auto bg-gray-800 p-8 rounded-2xl shadow-2xl animate-fade-in text-center relative">
         <button id="close-signup" class="absolute top-6 right-8 px-3 py-1 rounded-full bg-gray-600 text-white">&times;</button>
         <h2 class="mb-6 text-3xl font-bold text-sky-400">Sign Up</h2>
         <form id="signup-form" class="space-y-4 text-left">
-            <div>
-                <label for="signup-email" class="block text-sm text-gray-400 font-semibold mb-1">Email</label>
-                <input type="email" id="signup-email" required class="w-full bg-gray-700 p-3 rounded-lg text-white border-2 border-gray-700 focus:border-sky-400 transition" placeholder="Email" autocomplete="email" />
-            </div>
-            <div>
-                <label for="signup-password" class="block text-sm text-gray-400 font-semibold mb-1">Password</label>
-                <input type="password" id="signup-password" required class="w-full bg-gray-700 p-3 rounded-lg text-white border-2 border-gray-700 focus:border-sky-400 transition" placeholder="Password" autocomplete="new-password" />
-            </div>
-            <div>
-                <label for="signup-display-name" class="block text-sm text-gray-400 font-semibold mb-1">Display Name</label>
-                <input type="text" id="signup-display-name" required class="w-full bg-gray-700 p-3 rounded-lg text-white border-2 border-gray-700 focus:border-sky-400 transition" placeholder="Display Name" />
-            </div>
-            <button type="submit" class="w-full bg-sky-500 hover:bg-sky-600 py-3 rounded-xl font-bold text-white shadow transition">Sign Up</button>
+            <input type="email" id="signup-email" required class="w-full bg-gray-700 p-3 rounded-lg text-white" placeholder="Email"/>
+            <input type="password" id="signup-password" required class="w-full bg-gray-700 p-3 rounded-lg text-white" placeholder="Password"/>
+            <input type="text" id="signup-display-name" required class="w-full bg-gray-700 p-3 rounded-lg text-white" placeholder="Display Name"/>
+            <button type="submit" class="w-full bg-sky-500 hover:bg-sky-600 py-3 rounded-xl font-bold text-white">Sign Up</button>
         </form>
-        <div id="signup-error" class="text-red-400 mt-4 font-semibold text-center"></div>
-        <div id="signup-loading" class="hidden mt-6 flex justify-center"><svg class="animate-spin h-8 w-8 text-sky-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-30" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-80" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/></svg></div>
+        <div id="signup-error" class="text-red-400 mt-4"></div>
     </div>
 </div>
 
@@ -169,8 +184,8 @@
         signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup,
         createUserWithEmailAndPassword, updateProfile
     } from "https://www.gstatic.com/firebasejs/9.16.0/firebase-auth.js";
-    import { getFirestore, doc, getDoc, setDoc, addDoc, collection, getDocs, updateDoc, serverTimestamp as firestoreServerTimestamp, query, orderBy, onSnapshot, increment, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/9.16.0/firebase-firestore.js";
-    import { getDatabase, ref, onValue, onDisconnect, set, serverTimestamp as rtdbServerTimestamp } from "https://www.gstatic.com/firebasejs/9.16.0/firebase-database.js";
+    import { getFirestore, doc, getDoc, setDoc, addDoc, collection, getDocs, updateDoc, serverTimestamp as firestoreServerTimestamp, query, orderBy, onSnapshot, increment, arrayUnion, arrayRemove, where, deleteDoc } from "https://www.gstatic.com/firebasejs/9.16.0/firebase-firestore.js";
+    import { getDatabase, ref, onValue, onDisconnect, set, serverTimestamp as rtdbServerTimestamp, push } from "https://www.gstatic.com/firebasejs/9.16.0/firebase-database.js";
 
     const CLOUDINARY_URL = 'https://api.cloudinary.com/v1_1/djkz4hbed/upload';
     const CLOUDINARY_UPLOAD_PRESET = 'zaybn6xt';
@@ -193,77 +208,9 @@
 
     let currentUserData = null;
     let allUsersCache = [];
-    let unsubscribeFromUsers = () => {};
-
-    // -------- RENDER FUNCTIONS --------
-    const allUsersContainer = document.getElementById('all-users-container');
-    const friendRequestsContainer = document.getElementById('friend-requests-container');
-    const profileCard = document.getElementById('profile-card');
-    const badge = document.getElementById('friend-request-badge');
-
-    function renderProfileCard() {
-        if (!currentUserData) return;
-        profileCard.innerHTML = `<div class="w-24 h-24 rounded-full mx-auto bg-gray-700 mb-4 flex items-center justify-center overflow-hidden relative">
-            <img src="${currentUserData.photoURL}" alt="Profile Picture" class="w-full h-full object-cover">
-            <button id="edit-profile-btn" class="profile-edit-btn"><i class="fas fa-pen"></i></button>
-        </div>
-        <div class="relative"><h2 class="text-xl font-semibold inline-block">${currentUserData.displayName}</h2>
-        <button id="edit-displayname-btn" class="ml-2 text-sky-500 hover:text-sky-400"><i class="fas fa-pen"></i></button></div>
-        <p class="text-gray-400">${currentUserData.email}</p>
-        <div class="flex justify-around mt-4 border-t border-gray-700 pt-4"><div><p class="font-bold text-lg">${currentUserData.posts || 0}</p><p class="text-gray-400 text-sm">Posts</p></div><div><p class="font-bold text-lg">${(currentUserData.friends || []).length}</p><p class="text-gray-400 text-sm">Friends</p></div></div>`;
-        document.getElementById('edit-profile-btn').onclick = () => openProfileEditModal(currentUserData);
-        document.getElementById('edit-displayname-btn').onclick = () => openProfileEditModal(currentUserData);
-    }
-
-    function renderNotificationsBadge() {
-        if (!currentUserData) return;
-        const requestCount = (currentUserData.friendRequestsReceived || []).length;
-        if (requestCount > 0) { badge.textContent = requestCount; badge.classList.remove('hidden'); } else { badge.classList.add('hidden'); }
-    }
-
-    function renderAllUsers() {
-        allUsersContainer.innerHTML = '';
-        if (!currentUserData) return;
-        const usersToRender = allUsersCache.filter(u => u.id !== auth.currentUser.uid);
-        if (usersToRender.length === 0) {
-            allUsersContainer.innerHTML = `<p class="text-gray-400">No other users found.</p>`;
-            return;
-        }
-        usersToRender.forEach((otherUser) => {
-            const userElement = document.createElement('div');
-            userElement.className = 'flex items-center justify-between';
-            let buttonHtml;
-            if (currentUserData.friends?.includes(otherUser.id)) {
-                buttonHtml = `<button disabled class="bg-gray-500 text-white font-bold py-2 px-4 rounded-lg cursor-not-allowed">Friends</button>`;
-            } else if (currentUserData.friendRequestsSent?.includes(otherUser.id)) {
-                buttonHtml = `<button disabled class="bg-gray-500 text-white font-bold py-2 px-4 rounded-lg cursor-not-allowed">Request Sent</button>`;
-            } else if (currentUserData.friendRequestsReceived?.includes(otherUser.id)) {
-                buttonHtml = `<button data-uid="${otherUser.id}" class="accept-friend-button bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg">Accept</button>`;
-            } else {
-                buttonHtml = `<button data-uid="${otherUser.id}" class="add-friend-button bg-sky-500 hover:bg-sky-600 text-white font-bold py-2 px-4 rounded-lg">Add Friend</button>`;
-            }
-            userElement.innerHTML = `<div class="flex items-center"><div class="w-12 h-12 rounded-full bg-gray-700 flex-shrink-0 overflow-hidden"><img src="${otherUser.photoURL}" class="w-full h-full object-cover"></div><div class="ml-4"><p class="font-semibold">${otherUser.displayName}</p><p class="text-xs text-gray-400">${otherUser.email || ""}</p></div></div>${buttonHtml}`;
-            allUsersContainer.appendChild(userElement);
-        });
-    }
-
-    function displayFriendRequests() {
-        friendRequestsContainer.innerHTML = '';
-        if (!currentUserData) return;
-        const received = currentUserData.friendRequestsReceived || [];
-        if (received.length === 0) { friendRequestsContainer.innerHTML = `<p class="text-gray-400">No new friend requests.</p>`; return; }
-        
-        friendRequestsContainer.innerHTML = '';
-        for (const senderId of received) {
-            const senderData = allUsersCache.find(u => u.id === senderId);
-            if (senderData) {
-                const requestElement = document.createElement('div');
-                requestElement.className = 'flex items-center justify-between';
-                requestElement.innerHTML = `<div class="flex items-center"><div class="w-12 h-12 rounded-full bg-gray-700 flex-shrink-0 overflow-hidden"><img src="${senderData.photoURL}" class="w-full h-full object-cover"></div><p class="ml-4 font-semibold">${senderData.displayName}</p></div><div><button data-uid="${senderId}" class="accept-friend-req-btn bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg">Accept</button><button data-uid="${senderId}" class="decline-friend-req-btn bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg ml-2">Decline</button></div>`;
-                friendRequestsContainer.appendChild(requestElement);
-            }
-        }
-    }
+    let friendsCache = [];
+    let currentChatId = null;
+    let chatUnsubscribe = null;
 
     // -------- LOGIN, SIGNUP, PROFILE EDIT --------
     function showLoginForm() {
@@ -310,15 +257,11 @@
                 document.getElementById('login-error').textContent = err.message;
             }
         });
-        document.getElementById('google-login-btn').addEventListener('click', async (e) => {
-            e.preventDefault();
-            document.getElementById('login-error').textContent = '';
-            document.getElementById('login-loading').classList.remove('hidden');
+        document.getElementById('google-login-btn').addEventListener('click', async () => {
             try {
                 const provider = new GoogleAuthProvider();
                 await signInWithPopup(auth, provider);
             } catch (err) {
-                document.getElementById('login-loading').classList.add('hidden');
                 document.getElementById('login-error').textContent = err.message;
             }
         });
@@ -329,16 +272,13 @@
 
     document.getElementById('signup-form').addEventListener('submit', async (e) => {
         e.preventDefault();
-        document.getElementById('signup-error').textContent = '';
-        document.getElementById('signup-loading').classList.remove('hidden');
         const email = document.getElementById('signup-email').value;
         const password = document.getElementById('signup-password').value;
         const displayName = document.getElementById('signup-display-name').value;
         try {
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             await updateProfile(userCredential.user, {displayName});
-            const userRef = doc(db, "users", userCredential.user.uid);
-            await setDoc(userRef, {
+            await setDoc(doc(db, "users", userCredential.user.uid), {
                 displayName,
                 email,
                 photoURL: userCredential.user.photoURL || `https://api.dicebear.com/7.x/initials/svg?seed=${userCredential.user.uid}`,
@@ -346,11 +286,12 @@
                 friends: [],
                 friendRequestsSent: [],
                 friendRequestsReceived: [],
-                posts: 0
+                posts: 0,
+                pageDescription: '',
+                aboutMe: ''
             });
             document.getElementById('signup-modal').classList.add('hidden');
         } catch (err) {
-            document.getElementById('signup-loading').classList.add('hidden');
             document.getElementById('signup-error').textContent = err.message;
         }
     });
@@ -358,443 +299,54 @@
         document.getElementById('signup-modal').classList.add('hidden');
     });
 
-    let cropper = null;
-    let croppedBlob = null;
-    function openProfileEditModal(userData) {
-        document.getElementById('profile-edit-modal').classList.remove('hidden');
-        document.getElementById('profile-pic-crop').src = userData.photoURL;
-        document.getElementById('display-name-edit').value = userData.displayName;
-        croppedBlob = null;
-        if (cropper) cropper.destroy();
-        cropper = new Cropper(document.getElementById('profile-pic-crop'), {
-            aspectRatio: 1,
-            viewMode: 1,
-            dragMode: "move",
-            minContainerWidth: 250,
-            minContainerHeight: 250
-        });
-    }
-    document.getElementById('close-profile-edit').addEventListener('click', () => {
-        document.getElementById('profile-edit-modal').classList.add('hidden');
-        if (cropper) cropper.destroy();
-    });
-    document.getElementById('profile-pic-upload').addEventListener('change', (e) => {
-        if (e.target.files && e.target.files[0]) {
-            const reader = new FileReader();
-            reader.onload = function(ev) {
-                if (cropper) cropper.destroy();
-                cropper = new Cropper(document.getElementById('profile-pic-crop'), {
-                    aspectRatio: 1, viewMode: 1, dragMode: "move", minContainerWidth: 250, minContainerHeight: 250
-                });
-                cropper.replace(ev.target.result);
-            };
-            reader.readAsDataURL(e.target.files[0]);
-        }
-    });
-    document.getElementById('crop-profile-pic').addEventListener('click', async () => {
-        if (!cropper) return;
-        cropper.getCroppedCanvas({width: 256, height: 256, fillColor: '#222'}).toBlob((blob) => {
-            croppedBlob = blob;
-            document.getElementById('profile-edit-error').textContent = "Cropped! Now click Save Changes.";
-        }, 'image/jpeg');
-    });
-    document.getElementById('profile-edit-form').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        document.getElementById('profile-edit-error').textContent = '';
-        const newDisplayName = document.getElementById('display-name-edit').value;
-        let photoURL = currentUserData.photoURL;
-        try {
-            if (croppedBlob) {
-                const formData = new FormData();
-                formData.append('file', croppedBlob);
-                formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-                const response = await fetch(CLOUDINARY_URL, { method: 'POST', body: formData });
-                const data = await response.json();
-                if (data.secure_url) photoURL = data.secure_url;
-            }
-            await updateProfile(auth.currentUser, {displayName: newDisplayName, photoURL});
-            await updateDoc(doc(db, "users", auth.currentUser.uid), {
-                displayName: newDisplayName,
-                photoURL
-            });
-            document.getElementById('profile-edit-modal').classList.add('hidden');
-            if (cropper) cropper.destroy();
-        } catch (err) {
-            document.getElementById('profile-edit-error').textContent = err.message;
-        }
-    });
-
     // -------- MAIN AUTH STATE + APP UI LOGIC --------
     onAuthStateChanged(auth, async (user) => {
-        unsubscribeFromUsers();
-
         const mainContent = document.getElementById('main-content');
         const loadingScreen = document.getElementById('loading-screen');
         const headerNav = document.getElementById('header-nav');
-        
+
         if (user) {
+            loadingScreen.innerHTML = '<p class="text-gray-400 text-lg">Loading your universe...</p>';
             try {
                 const userRef = doc(db, "users", user.uid);
-                const userSnap = await getDoc(userRef);
+                
+                // Set up live listeners
+                onSnapshot(userRef, (docSnap) => {
+                    currentUserData = docSnap.data();
+                    if (!currentUserData) return;
+                    renderProfileCard(currentUserData);
+                    renderFriendsList(currentUserData.friends || []);
+                    updateFriendRequestBadge(currentUserData.friendRequestsReceived || []);
+                    if(!document.getElementById('pages-page-container').classList.contains('hidden')) renderMyPage();
+                });
+
+                onSnapshot(collection(db, "users"), (snapshot) => {
+                    allUsersCache = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+                    if(!document.getElementById('all-users-page-container').classList.contains('hidden')) renderAllUsers();
+                });
+
+                // Initial setup
+                let userSnap = await getDoc(userRef);
                 if (!userSnap.exists()) {
                     await setDoc(userRef, {
-                        displayName: user.displayName || (user.email ? user.email.split('@')[0] : 'New User'),
-                        email: user.email || 'No email provided',
+                        displayName: user.displayName || 'New User',
+                        email: user.email,
                         photoURL: user.photoURL || `https://api.dicebear.com/7.x/initials/svg?seed=${user.uid}`,
                         createdAt: new Date().toISOString(),
-                        friends: [],
-                        friendRequestsSent: [],
-                        friendRequestsReceived: [],
-                        posts: 0
+                        friends: [], friendRequestsSent: [], friendRequestsReceived: [],
+                        posts: 0, pageDescription: '', aboutMe: ''
                     });
                 }
 
-                // --- SINGLE SOURCE OF TRUTH REAL-TIME LISTENER ---
-                unsubscribeFromUsers = onSnapshot(collection(db, "users"), (snapshot) => {
-                    allUsersCache = [];
-                    snapshot.forEach((doc) => {
-                        const userData = { id: doc.id, ...doc.data() };
-                        allUsersCache.push(userData);
-                        if (doc.id === user.uid) {
-                            currentUserData = userData;
-                        }
-                    });
-
-                    if (currentUserData) {
-                        renderProfileCard();
-                        renderNotificationsBadge();
-                        const friendsPage = document.getElementById('friends-page-container');
-                        const notificationsPage = document.getElementById('notifications-page-container');
-                        if (!friendsPage.classList.contains('hidden')) {
-                            renderAllUsers();
-                        }
-                        if (!notificationsPage.classList.contains('hidden')) {
-                            displayFriendRequests();
-                        }
-                    }
-                });
-
-                const onlineUsersContainer = document.getElementById('online-users-container');
-                onValue(ref(rtdb, 'status'), (snapshot) => {
-                    onlineUsersContainer.innerHTML = '';
-                    let onlineCount = 0;
-                    snapshot.forEach((childSnapshot) => {
-                        const status = childSnapshot.val();
-                        if (status.state === 'online' && childSnapshot.key !== user.uid) {
-                            onlineCount++;
-                            const userElement = document.createElement('div');
-                            userElement.className = 'flex items-center';
-                            userElement.innerHTML = `<div class="relative"><div class="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center overflow-hidden"><img src="${status.photoURL}" alt="${status.displayName}" class="w-full h-full object-cover"></div><span class="absolute bottom-0 right-0 block h-3 w-3 rounded-full ring-2 ring-gray-900 bg-green-500"></span></div><p class="ml-3 font-semibold">${status.displayName}</p>`;
-                            onlineUsersContainer.appendChild(userElement);
-                        }
-                    });
-                    if (onlineCount === 0) { onlineUsersContainer.innerHTML = `<p class="text-gray-400">No other users are currently online.</p>`; }
-                });
-
-                const feedPage = document.getElementById('feed-page-container');
-                const notificationsPage = document.getElementById('notifications-page-container');
-                const friendsPage = document.getElementById('friends-page-container');
-                const navButtons = { home: document.getElementById('home-button'), friends: document.getElementById('friends-button'), notifications: document.getElementById('notifications-button') };
-
-                function showPage(page) {
-                    feedPage.classList.add('hidden');
-                    friendsPage.classList.add('hidden');
-                    notificationsPage.classList.add('hidden');
-                    Object.values(navButtons).forEach(b => b.classList.remove('active'));
-                    if (page === 'feed') { feedPage.classList.remove('hidden'); navButtons.home.classList.add('active'); }
-                    if (page === 'friends') { friendsPage.classList.remove('hidden'); navButtons.friends.classList.add('active'); renderAllUsers(); }
-                    if (page === 'notifications') { notificationsPage.classList.remove('hidden'); navButtons.notifications.classList.add('active'); displayFriendRequests(); }
-                }
-                navButtons.home.addEventListener('click', (e) => { e.preventDefault(); showPage('feed'); });
-                navButtons.friends.addEventListener('click', (e) => { e.preventDefault(); showPage('friends'); });
-                navButtons.notifications.addEventListener('click', (e) => { e.preventDefault(); showPage('notifications'); });
-
-                async function sendFriendRequest(recipientId) {
-                    try {
-                        const senderRef = doc(db, "users", user.uid);
-                        const recipientRef = doc(db, "users", recipientId);
-                        await updateDoc(senderRef, { friendRequestsSent: arrayUnion(recipientId) });
-                        await updateDoc(recipientRef, { friendRequestsReceived: arrayUnion(user.uid) });
-                    } catch (error) {
-                        console.error("Error sending friend request:", error);
-                        alert(`Failed to send friend request. Error: ${error.message}`);
-                    }
-                }
-
-                async function acceptFriendRequest(senderId) {
-                    try {
-                        const currentUserRef = doc(db, "users", user.uid);
-                        const senderRef = doc(db, "users", senderId);
-                        await updateDoc(currentUserRef, { friends: arrayUnion(senderId), friendRequestsReceived: arrayRemove(senderId) });
-                        await updateDoc(senderRef, { friends: arrayUnion(user.uid), friendRequestsSent: arrayRemove(user.uid) });
-                    } catch (error) {
-                        console.error("Error accepting friend request:", error);
-                        alert(`Failed to accept friend request. Error: ${error.message}`);
-                    }
-                }
-
-                async function declineFriendRequest(senderId) {
-                    try {
-                        const currentUserRef = doc(db, "users", user.uid);
-                        const senderRef = doc(db, "users", senderId);
-                        await updateDoc(currentUserRef, { friendRequestsReceived: arrayRemove(senderId) });
-                        await updateDoc(senderRef, { friendRequestsSent: arrayRemove(user.uid) });
-                    } catch (error) {
-                        console.error("Error declining friend request:", error);
-                        alert(`Failed to decline friend request. Error: ${error.message}`);
-                    }
-                }
-
-                allUsersContainer.addEventListener('click', async (e) => {
-                    const button = e.target.closest('button');
-                    if (!button || button.disabled) return;
-                    const uid = button.dataset.uid;
-                    if (button.classList.contains('add-friend-button')) {
-                        await sendFriendRequest(uid);
-                    }
-                    if (button.classList.contains('accept-friend-button')) {
-                        await acceptFriendRequest(uid);
-                    }
-                });
-
-                friendRequestsContainer.addEventListener('click', async (e) => {
-                    const button = e.target.closest('button');
-                    if (!button || button.disabled) return;
-                    const uid = button.dataset.uid;
-                    if (button.classList.contains('accept-friend-req-btn')) { 
-                        await acceptFriendRequest(uid); 
-                    }
-                    if (button.classList.contains('decline-friend-req-btn')) { 
-                        await declineFriendRequest(uid); 
-                    }
-                });
-
-                // --- POST CREATION LOGIC ---
-                const mediaUploadInput = document.getElementById('media-upload-input');
-                const mediaPreviewContainer = document.getElementById('media-preview-container');
-                let uploadedMedia = null;
-
-                document.getElementById('photo-button').addEventListener('click', () => mediaUploadInput.click());
-                mediaUploadInput.addEventListener('change', async (e) => {
-                    if (e.target.files && e.target.files[0]) {
-                        const file = e.target.files[0];
-                        const formData = new FormData();
-                        formData.append('file', file); formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-                        mediaPreviewContainer.innerHTML = `<p class="text-gray-400">Uploading...</p>`;
-                        try {
-                            const response = await fetch(CLOUDINARY_URL, { method: 'POST', body: formData });
-                            const data = await response.json();
-                            if (data.secure_url) {
-                                uploadedMedia = { url: data.secure_url, type: data.resource_type };
-                                if (data.resource_type.startsWith('video')) {
-                                    mediaPreviewContainer.innerHTML = `<video src="${uploadedMedia.url}" class="rounded-lg max-h-40 mx-auto" controls></video>`;
-                                } else {
-                                    mediaPreviewContainer.innerHTML = `<img src="${uploadedMedia.url}" class="rounded-lg max-h-40 mx-auto">`;
-                                }
-                            } else { throw new Error('Upload failed'); }
-                        } catch (error) { console.error('Cloudinary upload error:', error); mediaPreviewContainer.innerHTML = `<p class="text-red-400">Upload failed.</p>`; uploadedMedia = null; }
-                    }
-                });
-
-                document.getElementById('create-post-button').addEventListener('click', async () => {
-                    const content = document.getElementById('post-content').value.trim();
-                    if (!content && !uploadedMedia) return;
-                    try {
-                        await addDoc(collection(db, 'posts'), {
-                            authorId: user.uid,
-                            authorName: currentUserData.displayName,
-                            authorPhotoURL: currentUserData.photoURL,
-                            content: content,
-                            mediaUrl: uploadedMedia?.url || '',
-                            mediaType: uploadedMedia?.type || '',
-                            createdAt: firestoreServerTimestamp(),
-                            likedBy: [],
-                            commentCount: 0
-                        });
-                        await updateDoc(userRef, { posts: increment(1) });
-                        document.getElementById('post-content').value = '';
-                        mediaPreviewContainer.innerHTML = '';
-                        uploadedMedia = null;
-                    } catch (error) { console.error("Error creating post:", error); alert("There was an error creating your post."); }
-                });
-
-                // --- FEED LOGIC ---
-                const feedContainer = document.getElementById('feed-container');
-                const postsQuery = query(collection(db, "posts"), orderBy("createdAt", "desc"));
-                onSnapshot(postsQuery, (querySnapshot) => {
-                    feedContainer.innerHTML = '';
-                    if (querySnapshot.empty) { feedContainer.innerHTML = `<p class="text-gray-400">No posts yet. Be the first to share something!</p>`; return; }
-                    querySnapshot.forEach((postDoc) => {
-                        const post = postDoc.data();
-                        const postDate = post.createdAt?.toDate?.() ? post.createdAt.toDate().toLocaleString() : 'Just now';
-                        let mediaHTML = '';
-                        if (post.mediaUrl) {
-                            if (post.mediaType && post.mediaType.startsWith('video')) {
-                                mediaHTML = `<video src="${post.mediaUrl}" class="mt-4 rounded-lg w-full object-cover" controls></video>`;
-                            } else {
-                                mediaHTML = `<img src="${post.mediaUrl}" class="mt-4 rounded-lg max-h-96 w-full object-cover">`;
-                            }
-                        }
-                        const isLiked = post.likedBy?.includes(auth.currentUser.uid);
-                        const postElement = document.createElement('div');
-                        postElement.className = 'border-t border-gray-700 pt-4 mt-4';
-                        postElement.innerHTML = `
-                            <div class="flex items-start">
-                                <div class="w-12 h-12 rounded-full bg-gray-700 flex-shrink-0 flex items-center justify-center overflow-hidden">
-                                    <img src="${post.authorPhotoURL}" alt="${post.authorName}" class="w-full h-full object-cover">
-                                </div>
-                                <div class="ml-4 flex-grow">
-                                    <div class="flex items-center"><h3 class="font-semibold">${post.authorName}</h3><span class="text-gray-400 text-sm ml-2">&middot; ${postDate}</span></div>
-                                    <p class="mt-1">${post.content}</p>
-                                    ${mediaHTML}
-                                    <div class="mt-4 flex items-center text-gray-400">
-                                        <button data-post-id="${postDoc.id}" class="like-button hover:text-sky-400 flex items-center ${isLiked ? 'liked' : ''}"><i class="fas fa-thumbs-up mr-2"></i><span class="like-count">${(post.likedBy || []).length}</span></button>
-                                        <button data-post-id="${postDoc.id}" class="comment-button hover:text-sky-400 ml-4 flex items-center"><i class="fas fa-comment mr-2"></i><span class="comment-count">${post.commentCount || 0}</span></button>
-                                        <button data-post-id="${postDoc.id}" data-post-content="${post.content || ''}" class="share-button hover:text-sky-400 ml-4 flex items-center"><i class="fas fa-share mr-2"></i>Share</button>
-                                    </div>
-                                    <div class="comments-section mt-4 space-y-4 hidden" id="comments-section-${postDoc.id}"></div>
-                                </div>
-                            </div>`;
-                        feedContainer.appendChild(postElement);
-                    });
-                });
-
-                feedContainer.addEventListener('click', async (e) => {
-                    const user = auth.currentUser;
-                    if (!user) return;
-
-                    const likeButton = e.target.closest('.like-button');
-                    const commentButton = e.target.closest('.comment-button');
-                    const shareButton = e.target.closest('.share-button');
-                    const postCommentButton = e.target.closest('.post-comment-button');
-
-                    if (likeButton) {
-                        const postId = likeButton.dataset.postId;
-                        const postRef = doc(db, 'posts', postId);
-                        try {
-                            const postSnap = await getDoc(postRef);
-                            if (postSnap.exists()) {
-                                const postData = postSnap.data();
-                                if ((postData.likedBy || []).includes(user.uid)) {
-                                    await updateDoc(postRef, { likedBy: arrayRemove(user.uid) });
-                                } else {
-                                    await updateDoc(postRef, { likedBy: arrayUnion(user.uid) });
-                                }
-                            }
-                        } catch (err) { console.error("Like failed", err); }
-                    }
-
-                    if (commentButton) {
-                        const postId = commentButton.dataset.postId;
-                        const commentsSection = document.getElementById(`comments-section-${postId}`);
-                        if (commentsSection) {
-                            const isHidden = commentsSection.classList.toggle('hidden');
-                            if (!isHidden && !commentsSection.dataset.loaded) {
-                                commentsSection.dataset.loaded = 'true';
-                                commentsSection.innerHTML = `
-                                    <div class="flex items-start space-x-2 mt-2">
-                                        <input type="text" placeholder="Write a comment..." class="w-full bg-gray-800 rounded-lg p-2 text-sm comment-input">
-                                        <button class="post-comment-button bg-sky-500 hover:bg-sky-600 text-white font-bold py-2 px-4 rounded-lg text-sm" data-post-id="${postId}">Post</button>
-                                    </div>
-                                    <div class="comment-list mt-2 space-y-2"></div>
-                                    <p class="text-center text-gray-500 text-sm mt-2 hidden">Loading comments...</p>
-                                `;
-                                
-                                const commentList = commentsSection.querySelector('.comment-list');
-                                const loadingIndicator = commentsSection.querySelector('p');
-                                loadingIndicator.classList.remove('hidden');
-
-                                const commentsQuery = query(collection(db, 'posts', postId, 'comments'), orderBy('createdAt', 'desc'));
-                                onSnapshot(commentsQuery, (snapshot) => {
-                                    loadingIndicator.classList.add('hidden');
-                                    commentList.innerHTML = '';
-                                    if (snapshot.empty) {
-                                        commentList.innerHTML = '<p class="text-gray-400 text-sm">No comments yet.</p>';
-                                    }
-                                    snapshot.forEach(commentDoc => {
-                                        const comment = commentDoc.data();
-                                        const commentDate = comment.createdAt?.toDate?.() ? comment.createdAt.toDate().toLocaleTimeString() : '';
-                                        const commentEl = document.createElement('div');
-                                        commentEl.className = 'text-sm flex items-start space-x-2';
-                                        commentEl.innerHTML = `
-                                            <img src="${comment.authorPhotoURL}" alt="${comment.authorName}" class="w-8 h-8 rounded-full">
-                                            <div class="bg-gray-800 p-2 rounded-lg flex-grow">
-                                               <div class="flex justify-between">
-                                                 <span class="font-semibold">${comment.authorName}</span>
-                                                 <span class="text-xs text-gray-500">${commentDate}</span>
-                                               </div>
-                                               <p class="mt-1">${comment.content}</p>
-                                            </div>`;
-                                        commentList.appendChild(commentEl);
-                                    });
-                                });
-                            }
-                        }
-                    }
-
-                    if (postCommentButton) {
-                        const postId = postCommentButton.dataset.postId;
-                        const commentInput = postCommentButton.closest('.flex').querySelector('.comment-input');
-                        const content = commentInput.value.trim();
-                        if (content) {
-                            postCommentButton.disabled = true;
-                            const postRef = doc(db, 'posts', postId);
-                            try {
-                                await addDoc(collection(postRef, 'comments'), {
-                                    authorId: user.uid,
-                                    authorName: currentUserData.displayName,
-                                    authorPhotoURL: currentUserData.photoURL,
-                                    content: content,
-                                    createdAt: firestoreServerTimestamp()
-                                });
-                                await updateDoc(postRef, { commentCount: increment(1) });
-                                commentInput.value = '';
-                            } catch (err) {
-                                console.error("Error posting comment:", err);
-                            } finally {
-                                postCommentButton.disabled = false;
-                            }
-                        }
-                    }
-
-                    if (shareButton) {
-                        const postContent = shareButton.dataset.postContent;
-                        try {
-                            if (navigator.share) { await navigator.share({ title: 'Check out this post!', text: postContent, url: window.location.href });
-                            } else {
-                                await navigator.clipboard.writeText(postContent || window.location.href);
-                                alert('Post content copied to clipboard!');
-                            }
-                        } catch (err) {
-                            if (err.name !== 'AbortError') { console.error('Share failed:', err); alert('Could not share post.'); }
-                        }
-                    }
-                });
-
-                // --- FEELING MODAL ---
-                const feelingModal = document.getElementById('feeling-modal');
-                const emojiGrid = document.getElementById('emoji-grid');
-                const postContentInput = document.getElementById('post-content');
-                const feelings = ['😊', '😂', '😍', '🤔', '😢', '😠', '👍', '🎉', '🔥', '💯', '❤️', '🙏'];
-                emojiGrid.innerHTML = feelings.map(emoji => `<button class="emoji-button text-3xl hover:scale-125 transition-transform">${emoji}</button>`).join('');
-                document.getElementById('feeling-button').addEventListener('click', () => feelingModal.classList.remove('hidden'));
-                feelingModal.addEventListener('click', (e) => { if (e.target === feelingModal) { feelingModal.classList.add('hidden'); } });
-                emojiGrid.addEventListener('click', (e) => {
-                    if(e.target.classList.contains('emoji-button')) {
-                        postContentInput.value += ` — feeling ${e.target.textContent}`;
-                        feelingModal.classList.add('hidden');
-                    }
-                });
-
-                // --- USER MENU ---
-                const userMenu = document.getElementById('user-menu');
-                const userMenuButton = document.getElementById('user-menu-button');
-                const userMenuDropdown = document.getElementById('user-menu-dropdown');
-                userMenuButton.addEventListener('click', (event) => { event.stopPropagation(); userMenuDropdown.classList.toggle('hidden'); });
-                document.addEventListener('click', (event) => { 
-                    if (!userMenuDropdown.classList.contains('hidden') && !userMenu.contains(event.target)) { userMenuDropdown.classList.add('hidden'); } 
-                    if (event.target.id === 'sign-out-button') { event.preventDefault(); signOut(auth); }
-                });
+                setupNavigation();
+                setupPostCreation();
+                setupFeed();
+                setupFriendAndUserPages();
+                setupNotifications();
+                setupProfileEditing();
+                setupChat();
+                setupUserMenu();
+                setupProfilePictureEditing();
 
                 headerNav.classList.remove('hidden');
                 headerNav.classList.add('flex');
@@ -802,18 +354,746 @@
                 loadingScreen.classList.add('hidden');
 
             } catch (error) {
-                console.error("Fatal error during app initialization:", error);
-                loadingScreen.innerHTML = `<p class="text-red-400 text-xl font-semibold">Error: Could Not Load Profile</p><p class="text-gray-400 mt-2">There was a problem accessing your user data.</p><p class="text-gray-500 text-sm mt-4 font-mono bg-gray-800 p-2 rounded">${error.message}</p><button id="logout-error-button" class="mt-6 bg-sky-500 hover:bg-sky-600 text-white font-bold py-2 px-4 rounded-lg">Return to Login</button>`;
-                document.getElementById('logout-error-button').addEventListener('click', () => signOut(auth));
+                console.error("Authentication Error:", error);
+                loadingScreen.innerHTML = `<p class="text-red-400">Error: ${error.message}</p><button id="logout-error-button" class="mt-6 bg-sky-500 text-white font-bold py-2 px-4 rounded-lg">Sign Out</button>`;
+                document.getElementById('logout-error-button').onclick = () => signOut(auth);
             }
         } else {
             showLoginForm();
-            mainContent.classList.add('hidden');
             headerNav.classList.add('hidden');
-            headerNav.classList.remove('flex');
+            mainContent.classList.add('hidden');
             loadingScreen.classList.remove('hidden');
         }
     });
+
+    // --- UI RENDERING FUNCTIONS ---
+    function renderProfileCard(userData) {
+        const profileCard = document.getElementById('profile-card');
+        profileCard.innerHTML = `<div id="profile-pic-container" class="w-24 h-24 rounded-full mx-auto bg-gray-700 mb-4 overflow-hidden relative cursor-pointer group">
+            <img src="${userData.photoURL}" alt="Profile Picture" class="w-full h-full object-cover">
+            <div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                <i class="fas fa-camera text-white text-2xl"></i>
+            </div>
+        </div>
+        <h2 class="text-xl font-semibold">${userData.displayName}</h2>
+        <p class="text-gray-400">${userData.email}</p>
+        <div class="flex justify-around mt-4 border-t border-gray-700 pt-4">
+            <div><p class="font-bold text-lg">${userData.posts || 0}</p><p class="text-gray-400 text-sm">Posts</p></div>
+            <div><p class="font-bold text-lg">${(userData.friends || []).length}</p><p class="text-gray-400 text-sm">Friends</p></div>
+        </div>
+        <button id="edit-profile-btn" class="mt-4 w-full bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg">Edit Profile</button>`;
+
+        document.getElementById('profile-pic-container').onclick = () => {
+            document.getElementById('profile-pic-modal').classList.remove('hidden');
+        };
+        document.getElementById('edit-profile-btn').onclick = () => openProfileEditModal(userData);
+    }
+
+    async function renderFriendsList(friendIds) {
+        const friendsListContainer = document.getElementById('friends-list-container');
+        friendsListContainer.innerHTML = '';
+        if (!friendIds || friendIds.length === 0) {
+            friendsListContainer.innerHTML = `<p class="text-gray-400">No friends yet.</p>`;
+            return;
+        }
+        const friendPromises = friendIds.map(id => getDoc(doc(db, 'users', id)));
+        const friendSnaps = await Promise.all(friendPromises);
+        friendsCache = friendSnaps.map(snap => ({ id: snap.id, ...snap.data() }));
+        friendsCache.forEach(friend => {
+            const friendElement = document.createElement('div');
+            friendElement.className = 'flex items-center';
+            friendElement.innerHTML = `<div class="w-10 h-10 rounded-full bg-gray-700 overflow-hidden"><img src="${friend.photoURL}" class="w-full h-full object-cover"></div><p class="ml-3 font-semibold">${friend.displayName}</p>`;
+            friendsListContainer.appendChild(friendElement);
+        });
+        // Re-render chat UI to update dropdown
+        setupChat();
+    }
+
+    function updateFriendRequestBadge(requests) {
+        const badge = document.getElementById('friend-request-badge');
+        if (requests.length > 0) {
+            badge.textContent = requests.length;
+            badge.classList.remove('hidden');
+        } else {
+            badge.classList.add('hidden');
+        }
+    }
+
+    function renderAllUsers() {
+        const allUsersContainer = document.getElementById('all-users-container');
+        allUsersContainer.innerHTML = '';
+        const otherUsers = allUsersCache.filter(u => u.id !== auth.currentUser.uid);
+        if (otherUsers.length === 0) {
+            allUsersContainer.innerHTML = `<p class="text-gray-400">No other users found.</p>`;
+            return;
+        }
+        otherUsers.forEach(otherUser => {
+            const userElement = document.createElement('div');
+            userElement.className = 'flex items-center justify-between';
+            let buttonHtml;
+            if (currentUserData.friends?.includes(otherUser.id)) {
+                buttonHtml = `<button disabled class="bg-gray-500 text-white py-2 px-4 rounded-lg">Friends</button>`;
+            } else if (currentUserData.friendRequestsSent?.includes(otherUser.id)) {
+                buttonHtml = `<button disabled class="bg-gray-500 text-white py-2 px-4 rounded-lg">Request Sent</button>`;
+            } else if (currentUserData.friendRequestsReceived?.includes(otherUser.id)) {
+                buttonHtml = `<button data-uid="${otherUser.id}" class="accept-friend-button bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-lg">Accept</button>`;
+            } else {
+                buttonHtml = `<button data-uid="${otherUser.id}" class="add-friend-button bg-sky-500 hover:bg-sky-600 text-white py-2 px-4 rounded-lg">Add Friend</button>`;
+            }
+            userElement.innerHTML = `<div class="flex items-center"><img src="${otherUser.photoURL}" class="w-12 h-12 rounded-full"><div class="ml-4"><p class="font-semibold">${otherUser.displayName}</p><p class="text-xs text-gray-400">${otherUser.email || ''}</p></div></div>${buttonHtml}`;
+            allUsersContainer.appendChild(userElement);
+        });
+    }
+
+    async function renderMyPage() {
+        const pageContainer = document.getElementById('pages-page-container');
+        pageContainer.innerHTML = `
+            <div class="card">
+                <div class="text-center">
+                    <h2 class="text-2xl font-bold">${currentUserData.displayName}'s Page</h2>
+                    <p class="text-gray-400 mt-2">${currentUserData.pageDescription || 'No description yet. Click \'Edit Profile\' to add one.'}</p>
+                </div>
+                <div class="mt-6 border-t border-gray-700 pt-6">
+                    <h3 class="text-xl font-semibold">About Me</h3>
+                    <p class="text-gray-300 mt-2">${currentUserData.aboutMe || 'Nothing here yet. Click \'Edit Profile\' to add something.'}</p>
+                </div>
+                 <div class="mt-6 border-t border-gray-700 pt-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-xl font-semibold">Events</h3>
+                        <button id="add-event-btn" class="bg-sky-500 hover:bg-sky-600 text-white font-bold py-2 px-4 rounded-lg text-sm">Add Event</button>
+                    </div>
+                    <div id="add-event-form" class="hidden mb-4 p-4 bg-gray-800 rounded-lg">
+                        <input type="text" id="event-title" placeholder="Event Title" class="w-full bg-gray-700 rounded-lg p-2 mb-2">
+                        <textarea id="event-description" placeholder="Event Description" class="w-full bg-gray-700 rounded-lg p-2 mb-2"></textarea>
+                        <input type="date" id="event-date" class="w-full bg-gray-700 rounded-lg p-2 mb-2">
+                        <div>
+                            <button id="save-event-btn" class="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-lg">Save</button>
+                            <button id="cancel-event-btn" class="bg-gray-600 hover:bg-gray-500 text-white py-2 px-4 rounded-lg ml-2">Cancel</button>
+                        </div>
+                    </div>
+                    <div id="events-list" class="space-y-4"></div>
+                </div>
+            </div>
+            <div class="card mt-4">
+                <h2 class="text-xl font-semibold mb-4">My Posts</h2>
+                <div id="my-posts-container"></div>
+            </div>`;
+
+        const myPostsContainer = document.getElementById('my-posts-container');
+        const q = query(collection(db, "posts"), where("authorId", "==", auth.currentUser.uid), orderBy("createdAt", "desc"));
+        onSnapshot(q, (snapshot) => {
+            myPostsContainer.innerHTML = '';
+            const pagePosts = snapshot.docs.filter(doc => doc.data().visibility?.includes('page'));
+            if (pagePosts.length === 0) {
+                myPostsContainer.innerHTML = `<p class="text-gray-400">You haven't posted to your page yet.</p>`;
+                return;
+            }
+            pagePosts.forEach(postDoc => {
+                myPostsContainer.appendChild(renderPostElement(postDoc.id, postDoc.data()));
+            });
+        });
+
+        // New event logic
+        const addEventBtn = document.getElementById('add-event-btn');
+        const addEventForm = document.getElementById('add-event-form');
+        const cancelEventBtn = document.getElementById('cancel-event-btn');
+        const saveEventBtn = document.getElementById('save-event-btn');
+        const eventsList = document.getElementById('events-list');
+
+        addEventBtn.onclick = () => {
+            addEventForm.classList.remove('hidden');
+            addEventBtn.classList.add('hidden');
+        };
+        cancelEventBtn.onclick = () => {
+            addEventForm.classList.add('hidden');
+            addEventBtn.classList.remove('hidden');
+            document.getElementById('event-title').value = '';
+            document.getElementById('event-description').value = '';
+            document.getElementById('event-date').value = '';
+        };
+        saveEventBtn.onclick = async () => {
+            const title = document.getElementById('event-title').value;
+            const description = document.getElementById('event-description').value;
+            const date = document.getElementById('event-date').value;
+            if (!title || !date) {
+                alert('Event title and date are required.');
+                return;
+            }
+
+            const newEvent = {
+                title,
+                description,
+                date,
+                createdAt: firestoreServerTimestamp(),
+                authorId: auth.currentUser.uid
+            };
+
+            try {
+                await addDoc(collection(db, 'users', auth.currentUser.uid, 'events'), newEvent);
+                cancelEventBtn.click();
+            } catch (error) {
+                console.error("Error adding event:", error);
+                alert("Failed to add event.");
+            }
+        };
+
+        const eventsQuery = query(collection(db, 'users', auth.currentUser.uid, 'events'), orderBy('date', 'asc'));
+        onSnapshot(eventsQuery, (snapshot) => {
+            eventsList.innerHTML = '';
+            if (snapshot.empty) {
+                eventsList.innerHTML = '<p class="text-gray-400">No upcoming events.</p>';
+            } else {
+                snapshot.forEach(docSnap => {
+                    const event = docSnap.data();
+                    const eventEl = document.createElement('div');
+                    eventEl.className = 'bg-gray-800 p-4 rounded-lg flex justify-between items-start';
+                    eventEl.innerHTML = `
+                        <div>
+                            <h4 class="font-bold text-lg">${event.title}</h4>
+                            <p class="text-sm text-sky-400">${new Date(event.date).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                            <p class="mt-2 text-gray-300">${event.description}</p>
+                        </div>
+                        <button data-event-id="${docSnap.id}" class="delete-event-btn text-gray-500 hover:text-red-500 text-2xl font-bold">&times;</button>
+                    `;
+                    eventsList.appendChild(eventEl);
+                });
+            }
+        });
+
+        eventsList.addEventListener('click', async (e) => {
+            if (e.target.classList.contains('delete-event-btn')) {
+                const eventId = e.target.dataset.eventId;
+                if (confirm('Are you sure you want to delete this event?')) {
+                    try {
+                        await deleteDoc(doc(db, 'users', auth.currentUser.uid, 'events', eventId));
+                    } catch (error) {
+                        console.error("Error deleting event:", error);
+                        alert("Failed to delete event.");
+                    }
+                }
+            }
+        });
+    }
+
+    function renderPostElement(postId, post) {
+        const postDate = post.createdAt?.toDate?.() ? post.createdAt.toDate().toLocaleString() : 'Just now';
+        let mediaHTML = '';
+        if (post.mediaUrl) {
+            mediaHTML = post.mediaType?.startsWith('video')
+                ? `<video src="${post.mediaUrl}" class="mt-4 rounded-lg w-full" controls></video>`
+                : `<img src="${post.mediaUrl}" class="mt-4 rounded-lg max-h-96 w-full object-cover">`;
+        }
+        const isLiked = post.likedBy?.includes(auth.currentUser.uid);
+        const postElement = document.createElement('div');
+        postElement.className = 'border-t border-gray-700 pt-4 mt-4';
+        postElement.innerHTML = `
+            <div class="flex items-start">
+                <img src="${post.authorPhotoURL}" alt="${post.authorName}" class="w-12 h-12 rounded-full">
+                <div class="ml-4 flex-grow">
+                    <div class="flex items-center"><h3 class="font-semibold">${post.authorName}</h3><span class="text-gray-400 text-sm ml-2">&middot; ${postDate}</span></div>
+                    <p class="mt-1">${post.content}</p>
+                    ${mediaHTML}
+                    <div class="mt-4 flex items-center text-gray-400">
+                        <button data-post-id="${postId}" class="like-button hover:text-sky-400 flex items-center ${isLiked ? 'liked' : ''}"><i class="fas fa-thumbs-up mr-2"></i><span>${(post.likedBy || []).length}</span></button>
+                        <button data-post-id="${postId}" class="comment-button hover:text-sky-400 ml-4"><i class="fas fa-comment mr-2"></i>${post.commentCount || 0}</button>
+                        <button data-post-content="${post.content}" class="share-button hover:text-sky-400 ml-4"><i class="fas fa-share mr-2"></i>Share</button>
+                    </div>
+                    <div class="comments-section mt-4 space-y-4 hidden" id="comments-section-${postId}"></div>
+                </div>
+            </div>`;
+        return postElement;
+    }
+
+    // --- FEATURE SETUP FUNCTIONS ---
+    function setupNavigation() {
+        const pages = {
+            feed: document.getElementById('feed-page-container'),
+            mypage: document.getElementById('pages-page-container'),
+            users: document.getElementById('all-users-page-container'),
+            notifications: document.getElementById('notifications-page-container')
+        };
+        const navButtons = {
+            feed: document.getElementById('home-button'),
+            mypage: document.getElementById('pages-button'),
+            users: document.getElementById('friends-button'),
+            notifications: document.getElementById('notifications-button')
+        };
+
+        function showPage(pageKey) {
+            Object.values(pages).forEach(p => p.classList.add('hidden'));
+            Object.values(navButtons).forEach(b => b.classList.remove('active'));
+            pages[pageKey].classList.remove('hidden');
+            navButtons[pageKey].classList.add('active');
+
+            if (pageKey === 'mypage') renderMyPage();
+            if (pageKey === 'users') renderAllUsers();
+            if (pageKey === 'notifications') displayFriendRequests();
+        }
+
+        navButtons.feed.onclick = (e) => { e.preventDefault(); showPage('feed'); };
+        navButtons.mypage.onclick = (e) => { e.preventDefault(); showPage('mypage'); };
+        navButtons.users.onclick = (e) => { e.preventDefault(); showPage('users'); };
+        navButtons.notifications.onclick = (e) => { e.preventDefault(); showPage('notifications'); };
+    }
+
+    function setupPostCreation() {
+        const createPostBtn = document.getElementById('create-post-button');
+        const postContent = document.getElementById('post-content');
+        const mediaPreviewContainer = document.getElementById('media-preview-container');
+        let uploadedMedia = null;
+
+        document.getElementById('photo-button').onclick = () => document.getElementById('media-upload-input').click();
+        document.getElementById('media-upload-input').onchange = async (e) => {
+            if (!e.target.files[0]) return;
+            const file = e.target.files[0];
+            const formData = new FormData();
+            formData.append('file', file); formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+            mediaPreviewContainer.innerHTML = `<p class="text-gray-400">Uploading...</p>`;
+            try {
+                const res = await fetch(CLOUDINARY_URL, { method: 'POST', body: formData });
+                const data = await res.json();
+                uploadedMedia = { url: data.secure_url, type: data.resource_type };
+                mediaPreviewContainer.innerHTML = data.resource_type.startsWith('video')
+                    ? `<video src="${uploadedMedia.url}" class="rounded-lg max-h-40 mx-auto" controls></video>`
+                    : `<img src="${uploadedMedia.url}" class="rounded-lg max-h-40 mx-auto">`;
+            } catch (err) { mediaPreviewContainer.innerHTML = `<p class="text-red-400">Upload failed.</p>`; uploadedMedia = null; }
+        };
+
+        createPostBtn.onclick = async () => {
+            const content = postContent.value.trim();
+            const postToFeed = document.getElementById('post-visibility-feed').checked;
+            const postToPage = document.getElementById('post-visibility-page').checked;
+            const visibility = [];
+            if (postToFeed) visibility.push('feed');
+            if (postToPage) visibility.push('page');
+
+            if ((!content && !uploadedMedia) || visibility.length === 0) return;
+
+            try {
+                await addDoc(collection(db, 'posts'), {
+                    authorId: auth.currentUser.uid,
+                    authorName: currentUserData.displayName,
+                    authorPhotoURL: currentUserData.photoURL,
+                    content: content,
+                    mediaUrl: uploadedMedia?.url || '',
+                    mediaType: uploadedMedia?.type || '',
+                    createdAt: firestoreServerTimestamp(),
+                    likedBy: [],
+                    commentCount: 0,
+                    visibility: visibility
+                });
+                await updateDoc(doc(db, "users", auth.currentUser.uid), { posts: increment(1) });
+                postContent.value = '';
+                mediaPreviewContainer.innerHTML = '';
+                uploadedMedia = null;
+            } catch (error) { console.error("Error creating post:", error); }
+        };
+    }
+
+    function setupFeed() {
+        const feedContainer = document.getElementById('feed-container');
+        const q = query(collection(db, "posts"), orderBy("createdAt", "desc"));
+        onSnapshot(q, (snapshot) => {
+            feedContainer.innerHTML = '';
+            const feedPosts = snapshot.docs.filter(doc => {
+                const postData = doc.data();
+                // Show post if visibility is not defined (old posts) OR if it includes 'feed'
+                return postData.visibility === undefined || postData.visibility.includes('feed');
+            });
+
+            if (feedPosts.length === 0) {
+                feedContainer.innerHTML = `<p class="text-gray-400">No posts yet. Be the first!</p>`;
+                return;
+            }
+            feedPosts.forEach(postDoc => {
+                feedContainer.appendChild(renderPostElement(postDoc.id, postDoc.data()));
+            });
+        });
+
+        feedContainer.addEventListener('click', handlePostInteraction);
+    }
+
+    function setupFriendAndUserPages() {
+        const allUsersContainer = document.getElementById('all-users-container');
+        allUsersContainer.addEventListener('click', async (e) => {
+            const uid = e.target.dataset.uid;
+            if (!uid) return;
+            if (e.target.classList.contains('add-friend-button')) {
+                await updateDoc(doc(db, 'users', auth.currentUser.uid), { friendRequestsSent: arrayUnion(uid) });
+                await updateDoc(doc(db, 'users', uid), { friendRequestsReceived: arrayUnion(auth.currentUser.uid) });
+            }
+            if (e.target.classList.contains('accept-friend-button')) {
+                await acceptFriendRequest(uid);
+            }
+        });
+    }
+
+    async function acceptFriendRequest(senderId) {
+        const userRef = doc(db, 'users', auth.currentUser.uid);
+        const senderRef = doc(db, 'users', senderId);
+        await updateDoc(userRef, { friends: arrayUnion(senderId), friendRequestsReceived: arrayRemove(senderId) });
+        await updateDoc(senderRef, { friends: arrayUnion(auth.currentUser.uid), friendRequestsSent: arrayRemove(senderId) });
+        displayFriendRequests();
+    }
+
+    async function displayFriendRequests() {
+        const container = document.getElementById('friend-requests-container');
+        container.innerHTML = '';
+        const received = currentUserData.friendRequestsReceived || [];
+        if (received.length === 0) {
+            container.innerHTML = `<p class="text-gray-400">No new friend requests.</p>`;
+            return;
+        }
+        const senderPromises = received.map(id => getDoc(doc(db, 'users', id)));
+        const senderSnaps = await Promise.all(senderPromises);
+        senderSnaps.forEach(senderSnap => {
+            if (!senderSnap.exists()) return;
+            const senderData = senderSnap.data();
+            const reqEl = document.createElement('div');
+            reqEl.className = 'flex items-center justify-between';
+            reqEl.innerHTML = `
+                <div class="flex items-center"><img src="${senderData.photoURL}" class="w-12 h-12 rounded-full"><p class="ml-4 font-semibold">${senderData.displayName}</p></div>
+                <div>
+                    <button data-uid="${senderSnap.id}" class="accept-friend-button bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-lg">Accept</button>
+                    <button data-uid="${senderSnap.id}" class="decline-friend-button bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded-lg ml-2">Decline</button>
+                </div>`;
+            container.appendChild(reqEl);
+        });
+    }
+
+    function setupNotifications() {
+        const container = document.getElementById('notifications-page-container');
+        container.addEventListener('click', async (e) => {
+            const uid = e.target.dataset.uid;
+            if (!uid) return;
+            if (e.target.classList.contains('accept-friend-button')) {
+                await acceptFriendRequest(uid);
+            }
+            if (e.target.classList.contains('decline-friend-button')) {
+                const userRef = doc(db, 'users', auth.currentUser.uid);
+                const senderRef = doc(db, 'users', uid);
+                await updateDoc(userRef, { friendRequestsReceived: arrayRemove(uid) });
+                await updateDoc(senderRef, { friendRequestsSent: arrayRemove(auth.currentUser.uid) });
+                displayFriendRequests();
+            }
+        });
+    }
+
+    function setupProfileEditing() {
+        const modal = document.getElementById('profile-edit-modal');
+        document.getElementById('close-profile-edit').onclick = () => modal.classList.add('hidden');
+        document.getElementById('profile-edit-form').onsubmit = async (e) => {
+            e.preventDefault();
+            const newDisplayName = document.getElementById('display-name-edit').value;
+            const newPageDesc = document.getElementById('page-description-edit').value;
+            const newAboutMe = document.getElementById('about-me-edit').value;
+            try {
+                await updateDoc(doc(db, 'users', auth.currentUser.uid), {
+                    displayName: newDisplayName,
+                    pageDescription: newPageDesc,
+                    aboutMe: newAboutMe
+                });
+                await updateProfile(auth.currentUser, { displayName: newDisplayName });
+                modal.classList.add('hidden');
+            } catch (err) {
+                document.getElementById('profile-edit-error').textContent = err.message;
+            }
+        };
+    }
+
+    function openProfileEditModal(userData) {
+        document.getElementById('display-name-edit').value = userData.displayName;
+        document.getElementById('page-description-edit').value = userData.pageDescription || '';
+        document.getElementById('about-me-edit').value = userData.aboutMe || '';
+        document.getElementById('profile-edit-modal').classList.remove('hidden');
+    }
+
+    function setupChat() {
+        const chatWidget = document.getElementById('chat-widget');
+
+        let options = friendsCache.map(f => `<option value="${f.id}">${f.displayName}</option>`).join('');
+        chatWidget.innerHTML = `
+            <select id="chat-friend-select" class="w-full bg-gray-800 rounded-lg p-2 mb-2">
+                <option value="">Select a friend to chat...</option>
+                ${options}
+            </select>
+            <div id="chat-messages" class="h-64 overflow-y-auto bg-gray-800 rounded-lg p-2 mb-2"></div>
+            <div class="flex">
+                <input type="text" id="chat-input" placeholder="Type a message..." class="w-full bg-gray-800 rounded-l-lg p-2" disabled>
+                <button id="chat-send-btn" class="bg-sky-500 hover:bg-sky-600 text-white px-4 rounded-r-lg" disabled>Send</button>
+            </div>
+        `;
+        document.getElementById('chat-friend-select').onchange = (e) => openChat(e.target.value);
+        document.getElementById('chat-send-btn').onclick = sendMessage;
+        document.getElementById('chat-input').onkeyup = (e) => { if(e.key === 'Enter') sendMessage(); };
+
+        function openChat(friendId) {
+            const chatMessages = document.getElementById('chat-messages');
+            const chatInput = document.getElementById('chat-input');
+            const chatSendBtn = document.getElementById('chat-send-btn');
+
+            if (chatUnsubscribe) chatUnsubscribe();
+
+            if (!friendId) {
+                chatMessages.innerHTML = '<p class="text-gray-400 text-center">Select a friend to start chatting.</p>';
+                chatInput.disabled = true;
+                chatSendBtn.disabled = true;
+                currentChatId = null;
+                return;
+            }
+            
+            chatInput.disabled = false;
+            chatSendBtn.disabled = false;
+            const members = [auth.currentUser.uid, friendId].sort();
+            currentChatId = members.join('_');
+            const chatMessagesRef = ref(rtdb, `chats/${currentChatId}/messages`);
+            
+            chatUnsubscribe = onValue(chatMessagesRef, (snapshot) => {
+                chatMessages.innerHTML = '';
+                if (snapshot.exists()) {
+                    snapshot.forEach(childSnap => {
+                        const msg = childSnap.val();
+                        const msgEl = document.createElement('div');
+                        const isSender = msg.senderId === auth.currentUser.uid;
+                        msgEl.className = `p-2 my-1 rounded-lg text-white text-sm ${isSender ? 'bg-sky-600 ml-auto' : 'bg-gray-600 mr-auto'}`;
+                        msgEl.style.maxWidth = '80%';
+                        msgEl.textContent = msg.text;
+                        chatMessages.appendChild(msgEl);
+                    });
+                } else {
+                    chatMessages.innerHTML = '<p class="text-gray-400 text-center">No messages yet. Say hi!</p>';
+                }
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            });
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('chat-input');
+            const text = input.value.trim();
+            if (text && currentChatId) {
+                const chatMessagesRef = ref(rtdb, `chats/${currentChatId}/messages`);
+                push(chatMessagesRef, {
+                    senderId: auth.currentUser.uid,
+                    text: text,
+                    timestamp: rtdbServerTimestamp()
+                });
+                input.value = '';
+            }
+        }
+    }
+
+    async function handlePostInteraction(e) {
+        const user = auth.currentUser;
+        if (!user) return;
+
+        const likeButton = e.target.closest('.like-button');
+        if (likeButton) {
+            const postId = likeButton.dataset.postId;
+            const postRef = doc(db, 'posts', postId);
+            const postSnap = await getDoc(postRef);
+            if (postSnap.exists()) {
+                const likedBy = postSnap.data().likedBy || [];
+                if (likedBy.includes(user.uid)) {
+                    await updateDoc(postRef, { likedBy: arrayRemove(user.uid) });
+                } else {
+                    await updateDoc(postRef, { likedBy: arrayUnion(user.uid) });
+                }
+            }
+        }
+
+        const shareButton = e.target.closest('.share-button');
+        if (shareButton) {
+            const postContent = shareButton.dataset.postContent;
+            if (navigator.share) {
+                navigator.share({ title: 'Check out this post!', text: postContent, url: window.location.href });
+            } else {
+                navigator.clipboard.writeText(postContent || window.location.href).then(() => alert('Post content copied!'));
+            }
+        }
+        
+        const commentButton = e.target.closest('.comment-button');
+        if (commentButton) {
+            const postId = commentButton.dataset.postId;
+            const commentsSection = document.getElementById(`comments-section-${postId}`);
+            if (commentsSection) {
+                const isHidden = commentsSection.classList.toggle('hidden');
+                if (!isHidden) {
+                    loadComments(postId, commentsSection);
+                }
+            }
+        }
+    }
+
+    async function postComment(e) {
+        const postId = e.target.dataset.postId;
+        const input = document.getElementById(`comment-input-${postId}`);
+        const text = input.value.trim();
+
+        if (!text) return;
+
+        try {
+            const postRef = doc(db, 'posts', postId);
+            const commentsCollectionRef = collection(postRef, 'comments');
+
+            await addDoc(commentsCollectionRef, {
+                text: text,
+                authorId: auth.currentUser.uid,
+                authorName: currentUserData.displayName,
+                authorPhotoURL: currentUserData.photoURL,
+                createdAt: firestoreServerTimestamp()
+            });
+
+            await updateDoc(postRef, { commentCount: increment(1) });
+            input.value = '';
+        } catch (error) {
+            console.error("Error posting comment:", error);
+        }
+    }
+
+    async function loadComments(postId, container) {
+        container.innerHTML = `
+            <div class="flex mt-2">
+                <input type="text" id="comment-input-${postId}" class="w-full bg-gray-700 rounded-l-lg p-2 text-sm" placeholder="Write a comment...">
+                <button id="comment-submit-${postId}" data-post-id="${postId}" class="bg-sky-500 hover:bg-sky-600 text-white px-4 rounded-r-lg text-sm">Post</button>
+            </div>
+            <div id="comments-list-${postId}" class="mt-2 space-y-2"></div>
+            <p class="text-gray-400 text-sm mt-2" id="comments-loading-${postId}">Loading comments...</p>
+        `;
+
+        const commentSubmitBtn = document.getElementById(`comment-submit-${postId}`);
+        commentSubmitBtn.addEventListener('click', postComment);
+
+        const commentsList = document.getElementById(`comments-list-${postId}`);
+        const commentsLoading = document.getElementById(`comments-loading-${postId}`);
+
+        const q = query(collection(db, 'posts', postId, 'comments'), orderBy('createdAt', 'desc'));
+        onSnapshot(q, (snapshot) => {
+            commentsList.innerHTML = '';
+            if (snapshot.empty) {
+                commentsLoading.textContent = 'No comments yet.';
+            } else {
+                commentsLoading.classList.add('hidden');
+                snapshot.forEach(doc => {
+                    const comment = doc.data();
+                    const commentEl = document.createElement('div');
+                    commentEl.className = 'flex items-start text-sm pt-2';
+                    const commentDate = comment.createdAt?.toDate?.() ? comment.createdAt.toDate().toLocaleDateString() : 'Just now';
+                    commentEl.innerHTML = `
+                        <img src="${comment.authorPhotoURL}" class="w-8 h-8 rounded-full mr-2">
+                        <div>
+                            <p class="bg-gray-700 rounded-lg px-3 py-2">
+                                <span class="font-semibold text-sky-400">${comment.authorName}</span>
+                                <span class="text-gray-400 text-xs ml-2">&middot; ${commentDate}</span>
+                                <br>
+                                ${comment.text}
+                            </p>
+                        </div>
+                    `;
+                    commentsList.appendChild(commentEl);
+                });
+            }
+        });
+    }
+
+    function setupUserMenu() {
+        const userMenuButton = document.getElementById('user-menu-button');
+        const userMenuDropdown = document.getElementById('user-menu-dropdown');
+        const signOutButton = document.getElementById('sign-out-button');
+
+        userMenuButton.addEventListener('click', () => {
+            userMenuDropdown.classList.toggle('hidden');
+        });
+
+        signOutButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (chatUnsubscribe) chatUnsubscribe();
+            signOut(auth);
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!userMenuButton.contains(e.target) && !userMenuDropdown.contains(e.target)) {
+                userMenuDropdown.classList.add('hidden');
+            }
+        });
+    }
+
+    function setupProfilePictureEditing() {
+        const modal = document.getElementById('profile-pic-modal');
+        const closeBtn = document.getElementById('close-pic-modal');
+        const selectImageBtn = document.getElementById('select-image-btn');
+        const uploadInput = document.getElementById('profile-pic-upload-input');
+        const editorDiv = document.getElementById('profile-pic-editor');
+        const cropImage = document.getElementById('profile-pic-crop-image');
+        const saveBtn = document.getElementById('save-profile-pic-btn');
+        const loadingDiv = document.getElementById('pic-upload-loading');
+        let cropper = null;
+
+        closeBtn.onclick = () => {
+            modal.classList.add('hidden');
+            if (cropper) {
+                cropper.destroy();
+                cropper = null;
+            }
+            editorDiv.classList.add('hidden');
+            uploadInput.value = ''; // Reset file input
+        };
+
+        selectImageBtn.onclick = () => uploadInput.click();
+
+        uploadInput.onchange = (e) => {
+            if (e.target.files && e.target.files[0]) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    cropImage.src = event.target.result;
+                    editorDiv.classList.remove('hidden');
+                    if (cropper) {
+                        cropper.destroy();
+                    }
+                    cropper = new Cropper(cropImage, {
+                        aspectRatio: 1,
+                        viewMode: 1,
+                        background: false,
+                    });
+                };
+                reader.readAsDataURL(e.target.files[0]);
+            }
+        };
+
+        saveBtn.onclick = async () => {
+            if (!cropper) return;
+
+            loadingDiv.classList.remove('hidden');
+            saveBtn.disabled = true;
+
+            cropper.getCroppedCanvas({
+                width: 512,
+                height: 512,
+            }).toBlob(async (blob) => {
+                const formData = new FormData();
+                formData.append('file', blob);
+                formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+
+                try {
+                    const res = await fetch(CLOUDINARY_URL, { method: 'POST', body: formData });
+                    const data = await res.json();
+                    const newPhotoURL = data.secure_url;
+
+                    await updateDoc(doc(db, 'users', auth.currentUser.uid), { photoURL: newPhotoURL });
+                    await updateProfile(auth.currentUser, { photoURL: newPhotoURL });
+
+                    loadingDiv.classList.add('hidden');
+                    saveBtn.disabled = false;
+                    closeBtn.onclick();
+                } catch (err) {
+                    console.error("Error uploading profile picture:", err);
+                    loadingDiv.classList.add('hidden');
+                    saveBtn.disabled = false;
+                    alert('Upload failed. Please try again.');
+                }
+            }, 'image/jpeg');
+        };
+    }
+
 </script>
 </body>
 </html>
