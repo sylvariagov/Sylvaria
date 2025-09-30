@@ -34,6 +34,49 @@
         @keyframes fade-in { from { opacity: 0; transform: translateY(12px);} to { opacity: 1; transform: none;} }
         .cursor-pointer {cursor:pointer;}
         .hidden {display:none;}
+
+        /* --- Holiday Themes --- */
+
+        /* Base variables for themes */
+        .theme-nonbinary-kids-day { --theme-primary: #9B59B6; --theme-secondary: #F1C40F; --theme-accent: #000000; }
+        .theme-first-nations-day { --theme-primary: #E67E22; --theme-secondary: #2980B9; --theme-accent: #2C3E50; }
+        .theme-halloween { --theme-primary: #FF7800; --theme-secondary: #9B59B6; --theme-accent: #000000; }
+        .theme-thanksgiving { --theme-primary: #D35400; --theme-secondary: #F1C40F; --theme-accent: #C0392B; }
+        .theme-christmas { --theme-primary: #E74C3C; --theme-secondary: #2ECC71; --theme-accent: #F1C40F; }
+        .theme-new-years-eve, .theme-new-years-day { --theme-primary: #F1C40F; --theme-secondary: #BDC3C7; --theme-accent: #000000; }
+        .theme-valentines-day { --theme-primary: #E91E63; --theme-secondary: #C0392B; --theme-accent: #FFFFFF; }
+
+        /* Header Gradients */
+        .theme-nonbinary-kids-day header { background-image: linear-gradient(90deg, #FCF434, #FFFFFF, #9C59D1, #2C2C2C); }
+        .theme-christmas header { background-image: linear-gradient(90deg, #c0392b, #27ae60); }
+        .theme-first-nations-day header { background-image: linear-gradient(90deg, #E67E22, #2980B9, #D35400); }
+        .theme-halloween header { background-image: linear-gradient(90deg, #FF7800, #9B59B6, #000000); }
+        .theme-thanksgiving header { background-image: linear-gradient(90deg, #D35400, #F1C40F, #C0392B); }
+        .theme-new-years-eve header, .theme-new-years-day header { background-image: linear-gradient(90deg, #F1C40F, #BDC3C7, #000000); }
+        .theme-valentines-day header { background-image: linear-gradient(90deg, #E91E63, #C0392B); }
+
+        /* General Theme Application */
+        [class*="theme-"] .bg-sky-500 { background-color: var(--theme-primary) !important; }
+        [class*="theme-"] .hover\:bg-sky-600:hover { background-color: var(--theme-primary) !important; filter: brightness(0.9); }
+        [class*="theme-"] .peer-checked\:bg-sky-600:checked { background-color: var(--theme-primary) !important; }
+        [class*="theme-"] .focus\:border-sky-400:focus { border-color: var(--theme-primary) !important; }
+        [class*="theme-"] .text-sky-400 { color: var(--theme-primary) !important; }
+        [class*="theme-"] .like-button.liked { color: var(--theme-secondary) !important; }
+        [class*="theme-"] .hover\:text-sky-400:hover { color: var(--theme-secondary) !important; }
+        [class*="theme-"] .hashtag-link { color: var(--theme-accent) !important; }
+        [class*="theme-"] .bg-green-500 { background-color: var(--theme-secondary) !important; }
+
+        /* FIX for Header Icon/Text Visibility */
+        [class*="theme-"] header h1,
+        [class*="theme-"] header .nav-button,
+        [class*="theme-"] header #user-menu-button {
+            color: white !important;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+        }
+        [class*="theme-"] header .nav-button.active {
+            border-bottom-color: white !important;
+        }
+
     </style>
 </head>
 <body class="bg-gray-900">
@@ -50,6 +93,7 @@
         <a href="#" id="pages-button" class="nav-button text-gray-300 hover:text-white text-3xl px-6 py-2 rounded-lg"><i class="fas fa-file-alt"></i></a>
         <a href="#" id="groups-button" class="nav-button text-gray-300 hover:text-white text-3xl px-6 py-2 rounded-lg"><i class="fas fa-users"></i></a>
         <a href="#" id="friends-button" class="nav-button text-gray-300 hover:text-white text-3xl px-6 py-2 rounded-lg"><i class="fas fa-user-friends"></i></a>
+        <a href="#" id="themes-button" class="nav-button text-gray-300 hover:text-white text-3xl px-6 py-2 rounded-lg"><i class="fas fa-paint-brush"></i></a>
     </div>
 
     <!-- Right Section -->
@@ -244,6 +288,47 @@
     </div>
 </div>
 
+<!-- Themes Modal -->
+<div id="themes-modal" class="hidden fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
+    <div class="card w-full max-w-lg relative">
+        <button id="close-themes-modal" class="absolute top-2 right-4 px-3 py-1 rounded-full bg-gray-600 text-white">&times;</button>
+        <h2 class="text-xl font-semibold mb-4">Themes</h2>
+        <div id="holiday-theme-description" class="mb-4 text-gray-300 p-3 bg-gray-800 rounded-lg"></div>
+        <div id="themes-list" class="space-y-2">
+            <!-- Theme toggles will be inserted here by JS -->
+        </div>
+    </div>
+</div>
+
+<!-- Video Call Modal -->
+<div id="video-call-modal" class="hidden fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center">
+    <div class="bg-gray-800 rounded-lg shadow-xl p-6 w-full max-w-4xl relative">
+        <h2 class="text-2xl font-bold text-white mb-4" id="video-call-title">Video Call</h2>
+        <div class="grid grid-cols-2 gap-4">
+            <div class="bg-black rounded-lg h-96 flex items-center justify-center">
+                <video id="local-video" autoplay playsinline muted class="w-full h-full object-cover rounded-lg"></video>
+                <p id="local-video-placeholder" class="text-white">Your video</p>
+            </div>
+            <div class="bg-black rounded-lg h-96 flex items-center justify-center">
+                <video id="remote-video" autoplay playsinline class="w-full h-full object-cover rounded-lg"></video>
+                <p id="remote-video-placeholder" class="text-white">Friend's video</p>
+            </div>
+        </div>
+        <div class="flex justify-center items-center mt-4 space-x-4">
+            <button id="toggle-mic-btn" class="bg-gray-700 hover:bg-gray-600 text-white font-bold p-3 rounded-full text-2xl"><i class="fas fa-microphone"></i></button>
+            <button id="toggle-camera-btn" class="bg-gray-700 hover:bg-gray-600 text-white font-bold p-3 rounded-full text-2xl"><i class="fas fa-video"></i></button>
+            <button id="end-call-btn" class="bg-red-500 hover:bg-red-600 text-white font-bold p-3 rounded-full text-2xl"><i class="fas fa-phone-slash"></i></button>
+        </div>
+        <div id="incoming-call-notification" class="hidden absolute top-0 left-0 right-0 bottom-0 bg-gray-900 bg-opacity-80 flex flex-col items-center justify-center">
+            <p id="incoming-call-text" class="text-white text-2xl mb-4"></p>
+            <div class="flex">
+                <button id="accept-call-btn" class="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-full text-xl mr-4"><i class="fas fa-phone"></i></button>
+                <button id="reject-call-btn" class="bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-full text-xl"><i class="fas fa-phone-slash"></i></button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script type="module">
     // --- Firebase imports & config ---
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.16.0/firebase-app.js";
@@ -434,6 +519,8 @@
                 setupFeelingModal();
                 setupStories();
                 setupGroups();
+                setupVideoCall();
+                setupThemes();
 
                 document.getElementById('header-nav-center').classList.remove('hidden');
                 document.getElementById('header-nav-right').classList.remove('hidden');
@@ -501,7 +588,10 @@
                     <img src="${friend.photoURL}" class="w-10 h-10 rounded-full object-cover">
                     <p class="ml-3 font-semibold">${friend.displayName}</p>
                 </div>
-                <button data-uid="${friend.id}" class="view-user-page-btn bg-sky-500 hover:bg-sky-600 text-white text-xs font-bold py-1 px-2 rounded">View Page</button>
+                <div>
+                    <button data-uid="${friend.id}" data-name="${friend.displayName}" class="initiate-video-call-btn text-gray-400 hover:text-sky-400 mr-2 text-lg"><i class="fas fa-video"></i></button>
+                    <button data-uid="${friend.id}" class="view-user-page-btn bg-sky-500 hover:bg-sky-600 text-white text-xs font-bold py-1 px-2 rounded">View Page</button>
+                </div>
             `;
             friendsListContainer.appendChild(friendElement);
         });
@@ -753,6 +843,332 @@
     }
 
     // --- FEATURE SETUP FUNCTIONS ---
+    function setupThemes() {
+        const themesButton = document.getElementById('themes-button');
+        const themesModal = document.getElementById('themes-modal');
+        const closeThemesModal = document.getElementById('close-themes-modal');
+        const themesList = document.getElementById('themes-list');
+        const holidayThemeDescription = document.getElementById('holiday-theme-description');
+
+        const holidays = [
+            { name: 'Nonbinary Kids Day', month: 9, day: 1, className: 'theme-nonbinary-kids-day', description: 'Celebrated annually on October 1st, this day is dedicated to celebrating and supporting nonbinary children, raising awareness about their experiences, and advocating for their rights and well-being in all communities.' },
+            { name: 'First Nations Day', month: 9, day: 13, className: 'theme-first-nations-day', description: 'Observed on October 13th, this day is an opportunity to honor the rich history, diverse cultures, and significant contributions of First Nations, Inuit, and Métis peoples across the land. It\'s a time for reflection, learning, and reconciliation.' },
+            { name: 'Halloween', month: 9, day: 31, className: 'theme-halloween', description: 'October 31st marks the celebration of Halloween, a holiday steeped in traditions of costumes, spooky stories, and community gatherings. It\'s a time for fun and festivities, from trick-or-treating to carving pumpkins.' },
+            { name: 'Thanksgiving', month: 10, day: 'fourthThursday', className: 'theme-thanksgiving', description: 'Celebrated on the fourth Thursday of November in the United States, Thanksgiving is a day to gather with loved ones and express gratitude for the blessings of the year. It traditionally commemorates the harvest festival celebrated by the Pilgrims.' },
+            { name: 'Christmas', month: 11, day: 25, className: 'theme-christmas', description: 'Observed on December 25th, Christmas is a global holiday celebrating the birth of Jesus Christ. It\'s a time of joy, generosity, and togetherness, marked by traditions like decorating trees, exchanging gifts, and festive meals.' },
+            { name: 'New Year\'s Eve', month: 11, day: 31, className: 'theme-new-years-eve', description: 'December 31st is New Year\'s Eve, a night of celebration to bid farewell to the old year and welcome the new. Festivities often include parties, fireworks, and countdowns to midnight.' },
+            { name: 'New Year\'s Day', month: 0, day: 1, className: 'theme-new-years-day', description: 'January 1st marks the start of a new year in the Gregorian calendar. It\'s a day for fresh starts, setting resolutions, and looking forward to the opportunities of the year ahead.' },
+            { name: 'Valentine\'s Day', month: 1, day: 14, className: 'theme-valentines-day', description: 'Celebrated on February 14th, Valentine\'s Day is a cultural and commercial celebration of romance and love. It\'s a day to express affection to partners, friends, and family with cards, gifts, and kind gestures.' }
+        ];
+
+        let userThemeSettings = {}; // This will reset on page load.
+        let forcedHoliday = null; // Keep track of the previewed theme
+
+        function clearAllThemes() {
+            const themeClasses = holidays.map(h => h.className);
+            document.body.classList.remove(...themeClasses);
+        }
+
+        function applyTheme(holidayToForce = null) {
+            if (holidayToForce) {
+                forcedHoliday = holidayToForce;
+            }
+            
+            clearAllThemes();
+            let holidayToApply = forcedHoliday;
+
+            if (!holidayToApply) {
+                const today = new Date();
+                const currentMonth = today.getMonth();
+                const currentDate = today.getDate();
+
+                for (const holiday of holidays) {
+                    if (userThemeSettings[holiday.name] === false) continue; // Skip if disabled by user
+
+                    if (holiday.day === 'fourthThursday') {
+                        if (currentMonth === 10) { // November
+                            const firstDay = new Date(today.getFullYear(), 10, 1).getDay();
+                            const fourthThursday = 1 + (4 - firstDay + 7) % 7 + 21;
+                            if (currentDate === fourthThursday) {
+                                holidayToApply = holiday;
+                                break;
+                            }
+                        }
+                    } else if (currentMonth === holiday.month && currentDate === holiday.day) {
+                        holidayToApply = holiday;
+                        break;
+                    }
+                }
+            }
+
+            if (holidayToApply && (userThemeSettings[holidayToApply.name] === undefined || userThemeSettings[holidayToApply.name])) {
+                document.body.classList.add(holidayToApply.className);
+                if (themesModal.classList.contains('hidden') === false) {
+                    holidayThemeDescription.innerHTML = `<h3 class="font-semibold text-lg mb-2">${holidayToApply.name}</h3><p>${holidayToApply.description}</p>`;
+                }
+            } else {
+                if (themesModal.classList.contains('hidden') === false) {
+                    holidayThemeDescription.innerHTML = '<p>No active holiday theme today. You can enable or disable themes for upcoming holidays below, or preview a theme.</p>';
+                }
+            }
+        }
+
+        function renderThemeToggles() {
+            themesList.innerHTML = '';
+            holidays.forEach(holiday => {
+                const isEnabled = userThemeSettings[holiday.name] === undefined || userThemeSettings[holiday.name];
+                const themeId = `theme-toggle-${holiday.className}`;
+                const toggleHTML = `
+                    <div class="flex items-center justify-between p-2 rounded-lg hover:bg-gray-700">
+                        <label for="${themeId}" class="cursor-pointer">${holiday.name}</label>
+                        <div class="flex items-center">
+                            <button class="preview-theme-btn bg-gray-500 hover:bg-gray-600 text-white text-xs font-bold py-1 px-2 rounded mr-4" data-holiday-name="${holiday.name}">Preview</button>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="${themeId}" class="sr-only peer" data-holiday-name="${holiday.name}" ${isEnabled ? 'checked' : ''}>
+                                <div class="w-11 h-6 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-sky-600"></div>
+                            </label>
+                        </div>
+                    </div>
+                `;
+                themesList.innerHTML += toggleHTML;
+            });
+            themesList.innerHTML += `<button id="reset-theme-btn" class="mt-4 w-full bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg">Reset to Auto</button>`;
+        }
+
+        themesButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            renderThemeToggles();
+            const currentHoliday = forcedHoliday || holidays.find(h => document.body.classList.contains(h.className));
+            if (currentHoliday) {
+                 holidayThemeDescription.innerHTML = `<h3 class="font-semibold text-lg mb-2">${currentHoliday.name}</h3><p>${currentHoliday.description}</p>`;
+            } else {
+                 holidayThemeDescription.innerHTML = '<p>No active holiday theme today. You can enable or disable themes for upcoming holidays below, or preview a theme.</p>';
+            }
+            themesModal.classList.remove('hidden');
+        });
+
+        closeThemesModal.addEventListener('click', () => {
+            themesModal.classList.add('hidden');
+        });
+
+        themesList.addEventListener('change', (e) => {
+            if (e.target.type === 'checkbox') {
+                const holidayName = e.target.dataset.holidayName;
+                userThemeSettings[holidayName] = e.target.checked;
+                if (!forcedHoliday) {
+                    applyTheme();
+                }
+            }
+        });
+
+        themesList.addEventListener('click', (e) => {
+            if (e.target.classList.contains('preview-theme-btn')) {
+                const holidayName = e.target.dataset.holidayName;
+                const holidayToPreview = holidays.find(h => h.name === holidayName);
+                if (holidayToPreview) {
+                    applyTheme(holidayToPreview);
+                }
+            }
+            if (e.target.id === 'reset-theme-btn') {
+                forcedHoliday = null;
+                applyTheme();
+            }
+        });
+
+        applyTheme(); // Initial theme check on page load
+    }
+
+    function setupVideoCall() {
+        const videoCallModal = document.getElementById('video-call-modal');
+        const endCallBtn = document.getElementById('end-call-btn');
+        const acceptCallBtn = document.getElementById('accept-call-btn');
+        const rejectCallBtn = document.getElementById('reject-call-btn');
+        const incomingCallNotification = document.getElementById('incoming-call-notification');
+        const incomingCallText = document.getElementById('incoming-call-text');
+        const videoCallTitle = document.getElementById('video-call-title');
+
+        // --- WebRTC related variables --
+        // let localStream;
+        // let remoteStream;
+        // let peerConnection;
+        // let isCallInitiator = false;
+        // let currentCallId = null;
+
+        // This is where you would configure your STUN/TURN servers for WebRTC
+        // const configuration = {
+        //     iceServers: [
+        //         { urls: 'stun:stun.l.google.com:19302' }
+        //     ]
+        // };
+
+        // --- Mock signaling logic using Firebase RTDB ---
+
+        // Listen for incoming call offers
+        const userCallRef = ref(rtdb, `calls/${auth.currentUser.uid}`);
+        onValue(userCallRef, (snapshot) => {
+            if (snapshot.exists() && snapshot.val().type === 'offer') {
+                const callData = snapshot.val();
+                const callerData = allUsersCache.find(u => u.id === callData.from);
+                if (callerData) {
+                    incomingCallText.textContent = `${callerData.displayName} is calling...`;
+                    videoCallModal.classList.remove('hidden');
+                    incomingCallNotification.classList.remove('hidden');
+                    videoCallModal.dataset.callerId = callData.from;
+                }
+            }
+        });
+
+        document.body.addEventListener('click', async (e) => {
+            const initiateBtn = e.target.closest('.initiate-video-call-btn');
+            if (initiateBtn) {
+                const friendId = initiateBtn.dataset.uid;
+                const friendName = initiateBtn.dataset.name;
+                
+                // 1. Show the video call modal
+                videoCallTitle.textContent = `Calling ${friendName}...`;
+                videoCallModal.classList.remove('hidden');
+                incomingCallNotification.classList.add('hidden');
+
+                // 2. Send a call offer to the friend via Firebase
+                const callRef = ref(rtdb, `calls/${friendId}`);
+                set(callRef, {
+                    from: auth.currentUser.uid,
+                    type: 'offer',
+                    timestamp: rtdbServerTimestamp()
+                });
+
+                // 3. TODO: Start local video and set up WebRTC peer connection
+                alert("Starting video call... (UI only for now)");
+                // Example:
+                // isCallInitiator = true;
+                // currentCallId = `${auth.currentUser.uid}_${friendId}`;
+                // await startWebRTCCall(friendId);
+            }
+        });
+
+        acceptCallBtn.onclick = async () => {
+            const callerId = videoCallModal.dataset.callerId;
+            if (!callerId) return;
+
+            // 1. Send an 'answer' signal back to the caller
+            const callerRef = ref(rtdb, `calls/${callerId}`);
+            set(callerRef, {
+                from: auth.currentUser.uid,
+                type: 'answer',
+                timestamp: rtdbServerTimestamp()
+            });
+
+            // 2. Clear the offer from our own 'calls' entry
+            const myCallRef = ref(rtdb, `calls/${auth.currentUser.uid}`);
+            set(myCallRef, null);
+
+            // 3. TODO: Set up WebRTC connection as the receiver
+            incomingCallNotification.classList.add('hidden');
+            videoCallTitle.textContent = "Video Call";
+            alert("Call accepted! (UI only for now)");
+            // Example:
+            // isCallInitiator = false;
+            // currentCallId = `${callerId}_${auth.currentUser.uid}`;
+            // await startWebRTCCall(callerId);
+        };
+
+        rejectCallBtn.onclick = () => {
+            const callerId = videoCallModal.dataset.callerId;
+            
+            // 1. Send a 'reject' signal (optional, or just clear the offer)
+            const myCallRef = ref(rtdb, `calls/${auth.currentUser.uid}`);
+            set(myCallRef, null);
+
+            // 2. Hide the modal
+            videoCallModal.classList.add('hidden');
+        };
+
+        endCallBtn.onclick = () => {
+            // TODO: Clean up WebRTC connection and signal end of call
+            videoCallModal.classList.add('hidden');
+            alert("Call ended. (UI only for now)");
+            // Example:
+            // if (peerConnection) peerConnection.close();
+            // if (localStream) localStream.getTracks().forEach(track => track.stop());
+            // const otherUserId = isCallInitiator ? ... : ...;
+            // const endCallRef = ref(rtdb, `calls/${otherUserId}`);
+            // set(endCallRef, { type: 'end' });
+        };
+
+        // --- Placeholder for the full WebRTC call logic ---
+        // async function startWebRTCCall(friendId) {
+        //     // Get local media stream
+        //     localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        //     document.getElementById('local-video').srcObject = localStream;
+        //
+        //     // Create peer connection
+        //     peerConnection = new RTCPeerConnection(configuration);
+        //
+        //     // Add local tracks to the connection
+        //     localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+        //
+        //     // Handle incoming remote tracks
+        //     peerConnection.ontrack = event => {
+        //         document.getElementById('remote-video').srcObject = event.streams[0];
+        //     };
+        //
+        //     // ... and so on for ICE candidates, offers, answers ...
+        // }
+    }
+
+    async function clearAllFriends() {
+        if (!confirm("Are you sure you want to delete all friend connections for all users? This action cannot be undone.")) {
+            return;
+        }
+        const usersCollectionRef = collection(db, 'users');
+        const usersSnapshot = await getDocs(usersCollectionRef);
+        console.log(`Found ${usersSnapshot.docs.length} users. Preparing to clear friends lists.`);
+
+        const updates = [];
+        usersSnapshot.forEach(userDoc => {
+            const userRef = doc(db, 'users', userDoc.id);
+            updates.push(updateDoc(userRef, { friends: [] }));
+        });
+
+        try {
+            await Promise.all(updates);
+            console.log('All friends lists have been successfully cleared.');
+            alert('All friends lists have been successfully cleared.');
+        } catch (error) {
+            console.error('Error clearing friends lists:', error);
+            alert('Error clearing friends lists: ' + error.message);
+        }
+    }
+    window.clearAllFriends = clearAllFriends;
+
+    async function clearAllFriendRequests() {
+        if (!confirm("Are you sure you want to delete all pending friend requests for all users? This action cannot be undone.")) {
+            return;
+        }
+        const usersCollectionRef = collection(db, 'users');
+        const usersSnapshot = await getDocs(usersCollectionRef);
+        console.log(`Found ${usersSnapshot.docs.length} users. Preparing to clear friend requests.`);
+
+        const updates = [];
+        usersSnapshot.forEach(userDoc => {
+            const userRef = doc(db, 'users', userDoc.id);
+            updates.push(updateDoc(userRef, {
+                friendRequestsSent: [],
+                friendRequestsReceived: []
+            }));
+        });
+
+        try {
+            await Promise.all(updates);
+            console.log('All friend requests have been successfully cleared.');
+            alert('All friend requests have been successfully cleared.');
+        } catch (error) {
+            console.error('Error clearing friend requests:', error);
+            alert('Error clearing friend requests: ' + error.message);
+        }
+    }
+    window.clearAllFriendRequests = clearAllFriendRequests;
+
     function setupNavigation() {
         const pages = {
             feed: document.getElementById('feed-page-container'),
