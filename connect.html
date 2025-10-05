@@ -1410,6 +1410,23 @@
         document.getElementById('profile-edit-modal').classList.remove('hidden');
     }
 
+    function showNotification(title, body) {
+        if (!('Notification' in window)) {
+            console.log('This browser does not support desktop notification');
+            return;
+        }
+
+        if (Notification.permission === 'granted') {
+            new Notification(title, { body });
+        } else if (Notification.permission !== 'denied') {
+            Notification.requestPermission().then(permission => {
+                if (permission === 'granted') {
+                    new Notification(title, { body });
+                }
+            });
+        }
+    }
+
     function setupChat() {
         const chatWidget = document.getElementById('chat-widget');
 
@@ -1450,11 +1467,29 @@
             currentChatId = members.join('_');
             const chatMessagesRef = ref(rtdb, `chats/${currentChatId}/messages`);
             
+            let isInitialLoad = true; 
+
             chatUnsubscribe = onValue(chatMessagesRef, (snapshot) => {
-                chatMessages.innerHTML = '';
+                const messages = [];
                 if (snapshot.exists()) {
                     snapshot.forEach(childSnap => {
-                        const msg = childSnap.val();
+                        messages.push({ key: childSnap.key, ...childSnap.val() });
+                    });
+                }
+
+                if (!isInitialLoad && messages.length > 0) {
+                    const latestMessage = messages[messages.length - 1];
+                    if (latestMessage.senderId !== auth.currentUser.uid && document.hidden) {
+                         const friend = friendsCache.find(f => f.id === friendId);
+                         if(friend){
+                            showNotification(`New message from ${friend.displayName}`, latestMessage.text);
+                         }
+                    }
+                }
+
+                chatMessages.innerHTML = '';
+                if (messages.length > 0) {
+                    messages.forEach(msg => {
                         const msgEl = document.createElement('div');
                         const isSender = msg.senderId === auth.currentUser.uid;
                         msgEl.className = `p-2 my-1 rounded-lg text-white text-sm ${isSender ? 'bg-sky-600 ml-auto' : 'bg-gray-600 mr-auto'}`;
@@ -1466,6 +1501,8 @@
                     chatMessages.innerHTML = '<p class="text-gray-400 text-center">No messages yet. Say hi!</p>';
                 }
                 chatMessages.scrollTop = chatMessages.scrollHeight;
+                
+                isInitialLoad = false;
             });
         }
 
