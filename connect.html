@@ -338,7 +338,7 @@
         createUserWithEmailAndPassword, updateProfile
     } from "https://www.gstatic.com/firebasejs/9.16.0/firebase-auth.js";
     import { getFirestore, doc, getDoc, setDoc, addDoc, collection, getDocs, updateDoc, serverTimestamp as firestoreServerTimestamp, query, orderBy, onSnapshot, increment, arrayUnion, arrayRemove, where, deleteDoc } from "https://www.gstatic.com/firebasejs/9.16.0/firebase-firestore.js";
-    import { getDatabase, ref, onValue, onDisconnect, set, serverTimestamp as rtdbServerTimestamp, push } from "https://www.gstatic.com/firebasejs/9.16.0/firebase-database.js";
+    import { getDatabase, ref, onValue, onDisconnect, set, serverTimestamp as rtdbServerTimestamp, push, get, onChildAdded, startAt, orderByChild } from "https://www.gstatic.com/firebasejs/9.16.0/firebase-database.js";
 
     const CLOUDINARY_URL = 'https://api.cloudinary.com/v1_1/djkz4hbed/upload';
     const CLOUDINARY_UPLOAD_PRESET = 'zaybn6xt';
@@ -1418,7 +1418,12 @@
 
         if (Notification.permission === 'granted') {
             new Notification(title, { body });
-        } else if (Notification.permission !== 'denied') {
+        } else if (Notification.permission === 'denied') {
+            if (!window.notifPermissionAlerted) {
+                alert('You have blocked notifications for this site. Please enable them in your browser settings to receive chat alerts.');
+                window.notifPermissionAlerted = true;
+            }
+        } else { // 'default'
             Notification.requestPermission().then(permission => {
                 if (permission === 'granted') {
                     new Notification(title, { body });
@@ -1428,98 +1433,113 @@
     }
 
     function setupChat() {
-        const chatWidget = document.getElementById('chat-widget');
+    const chatWidget = document.getElementById('chat-widget');
 
-        let options = friendsCache.map(f => `<option value="${f.id}">${f.displayName}</option>`).join('');
-        chatWidget.innerHTML = `
-            <select id="chat-friend-select" class="w-full bg-gray-800 rounded-lg p-2 mb-2">
-                <option value="">Select a friend to chat...</option>
-                ${options}
-            </select>
-            <div id="chat-messages" class="h-64 overflow-y-auto bg-gray-800 rounded-lg p-2 mb-2"></div>
-            <div class="flex">
-                <input type="text" id="chat-input" placeholder="Type a message..." class="w-full bg-gray-800 rounded-l-lg p-2" disabled>
-                <button id="chat-send-btn" class="bg-sky-500 hover:bg-sky-600 text-white px-4 rounded-r-lg" disabled>Send</button>
-            </div>
-        `;
-        document.getElementById('chat-friend-select').onchange = (e) => openChat(e.target.value);
-        document.getElementById('chat-send-btn').onclick = sendMessage;
-        document.getElementById('chat-input').onkeyup = (e) => { if(e.key === 'Enter') sendMessage(); };
+    const friendSelect = chatWidget.querySelector('#chat-friend-select');
+    const selectedFriendId = friendSelect ? friendSelect.value : null;
 
-        function openChat(friendId) {
-            const chatMessages = document.getElementById('chat-messages');
-            const chatInput = document.getElementById('chat-input');
-            const chatSendBtn = document.getElementById('chat-send-btn');
+    let options = friendsCache.map(f => `<option value="${f.id}">${f.displayName}</option>`).join('');
+    chatWidget.innerHTML = `
+        <select id="chat-friend-select" class="w-full bg-gray-800 rounded-lg p-2 mb-2">
+            <option value="">Select a friend to chat...</option>
+            ${options}
+        </select>
+        <div id="chat-messages" class="h-64 overflow-y-auto bg-gray-800 rounded-lg p-2 mb-2"><p class="text-gray-400 text-center">Select a friend to start chatting.</p></div>
+        <div class="flex">
+            <input type="text" id="chat-input" placeholder="Type a message..." class="w-full bg-gray-800 rounded-l-lg p-2" disabled>
+            <button id="chat-send-btn" class="bg-sky-500 hover:bg-sky-600 text-white px-4 rounded-r-lg" disabled>Send</button>
+        </div>
+    `;
 
-            if (chatUnsubscribe) chatUnsubscribe();
+    if (selectedFriendId) {
+        chatWidget.querySelector('#chat-friend-select').value = selectedFriendId;
+        openChat(selectedFriendId);
+    }
 
-            if (!friendId) {
-                chatMessages.innerHTML = '<p class="text-gray-400 text-center">Select a friend to start chatting.</p>';
-                chatInput.disabled = true;
-                chatSendBtn.disabled = true;
-                currentChatId = null;
-                return;
-            }
-            
-            chatInput.disabled = false;
-            chatSendBtn.disabled = false;
-            const members = [auth.currentUser.uid, friendId].sort();
-            currentChatId = members.join('_');
-            const chatMessagesRef = ref(rtdb, `chats/${currentChatId}/messages`);
-            
-            let isInitialLoad = true; 
+    document.getElementById('chat-friend-select').onchange = (e) => openChat(e.target.value);
+    document.getElementById('chat-send-btn').onclick = sendMessage;
+    document.getElementById('chat-input').onkeyup = (e) => { if (e.key === 'Enter') sendMessage(); };
 
-            chatUnsubscribe = onValue(chatMessagesRef, (snapshot) => {
-                const messages = [];
-                if (snapshot.exists()) {
-                    snapshot.forEach(childSnap => {
-                        messages.push({ key: childSnap.key, ...childSnap.val() });
-                    });
-                }
+    const renderSingleMessage = (msg, container) => {
+        const msgEl = document.createElement('div');
+        const isSender = msg.senderId === auth.currentUser.uid;
+        msgEl.className = `p-2 my-1 rounded-lg text-white text-sm ${isSender ? 'bg-sky-600 ml-auto' : 'bg-gray-600 mr-auto'}`;
+        msgEl.style.maxWidth = '80%';
+        msgEl.textContent = msg.text;
+        container.appendChild(msgEl);
+        container.scrollTop = container.scrollHeight;
+    };
 
-                if (!isInitialLoad && messages.length > 0) {
-                    const latestMessage = messages[messages.length - 1];
-                    if (latestMessage.senderId !== auth.currentUser.uid && document.hidden) {
-                         const friend = friendsCache.find(f => f.id === friendId);
-                         if(friend){
-                            showNotification(`New message from ${friend.displayName}`, latestMessage.text);
-                         }
+    async function openChat(friendId) {
+        const chatMessages = document.getElementById('chat-messages');
+        const chatInput = document.getElementById('chat-input');
+        const chatSendBtn = document.getElementById('chat-send-btn');
+
+        if (chatUnsubscribe) chatUnsubscribe();
+
+        if (!friendId) {
+            chatMessages.innerHTML = '<p class="text-gray-400 text-center">Select a friend to start chatting.</p>';
+            chatInput.disabled = true;
+            chatSendBtn.disabled = true;
+            currentChatId = null;
+            return;
+        }
+
+        chatInput.disabled = false;
+        chatSendBtn.disabled = false;
+        const members = [auth.currentUser.uid, friendId].sort();
+        currentChatId = members.join('_');
+        const messagesRef = ref(rtdb, `chats/${currentChatId}/messages`);
+        const q = query(messagesRef, orderByChild('timestamp'));
+
+        chatMessages.innerHTML = ''; // Clear chat
+
+        // Get initial messages
+        const initialSnapshot = await get(q);
+        if (initialSnapshot.exists()) {
+            initialSnapshot.forEach(childSnap => {
+                renderSingleMessage(childSnap.val(), chatMessages);
+            });
+        } else {
+            chatMessages.innerHTML = '<p class="text-gray-400 text-center">No messages yet. Say hi!</p>';
+        }
+
+        // Listen for new messages
+        const newMessagesQuery = query(messagesRef, startAt(Date.now()), orderByChild('timestamp'));
+        chatUnsubscribe = onChildAdded(newMessagesQuery, (snapshot) => {
+            const msg = snapshot.val();
+            if (msg.senderId !== auth.currentUser.uid) {
+                renderSingleMessage(msg, chatMessages);
+                if (document.hidden) {
+                    const friend = friendsCache.find(f => f.id === friendId);
+                    if (friend) {
+                        showNotification(`New message from ${friend.displayName}`, msg.text);
                     }
                 }
-
-                chatMessages.innerHTML = '';
-                if (messages.length > 0) {
-                    messages.forEach(msg => {
-                        const msgEl = document.createElement('div');
-                        const isSender = msg.senderId === auth.currentUser.uid;
-                        msgEl.className = `p-2 my-1 rounded-lg text-white text-sm ${isSender ? 'bg-sky-600 ml-auto' : 'bg-gray-600 mr-auto'}`;
-                        msgEl.style.maxWidth = '80%';
-                        msgEl.textContent = msg.text;
-                        chatMessages.appendChild(msgEl);
-                    });
-                } else {
-                    chatMessages.innerHTML = '<p class="text-gray-400 text-center">No messages yet. Say hi!</p>';
-                }
-                chatMessages.scrollTop = chatMessages.scrollHeight;
-                
-                isInitialLoad = false;
-            });
-        }
-
-        function sendMessage() {
-            const input = document.getElementById('chat-input');
-            const text = input.value.trim();
-            if (text && currentChatId) {
-                const chatMessagesRef = ref(rtdb, `chats/${currentChatId}/messages`);
-                push(chatMessagesRef, {
-                    senderId: auth.currentUser.uid,
-                    text: text,
-                    timestamp: rtdbServerTimestamp()
-                });
-                input.value = '';
             }
+        });
+    }
+
+    function sendMessage() {
+        const input = document.getElementById('chat-input');
+        const text = input.value.trim();
+        if (text && currentChatId) {
+            const chatMessagesRef = ref(rtdb, `chats/${currentChatId}/messages`);
+            const newMessage = {
+                senderId: auth.currentUser.uid,
+                text: text,
+                timestamp: rtdbServerTimestamp()
+            };
+            push(chatMessagesRef, newMessage);
+
+            // Manually render the sender's message since onChildAdded won't fire for the sender
+            const chatMessages = document.getElementById('chat-messages');
+            if(chatMessages.querySelector('p')) chatMessages.innerHTML = ''; // Clear "No messages" text
+            renderSingleMessage({senderId: auth.currentUser.uid, text: text}, chatMessages);
+            input.value = '';
         }
     }
+}
 
     async function handlePostInteraction(e) {
         const user = auth.currentUser;
